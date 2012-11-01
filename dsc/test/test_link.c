@@ -14,6 +14,8 @@ Int32_t main(void)
 {
     log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK TEST--------");
     link_test(SIGNAL_LINK_LIST);
+    log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK TEST--------");
+    link_test(DOUBLE_LINK_LIST);
     return OK;
 }
 static void link_test(link_type_t type)
@@ -50,7 +52,7 @@ static void link_test(link_type_t type)
 static Status visitnode_link(void *val)
 {
     assert(val);
-    printf(" %d",*(Int32_t *)val);
+    printf("%d",*(Int32_t *)val);
     return OK;
 }
 
