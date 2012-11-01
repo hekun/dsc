@@ -128,14 +128,14 @@ static Status InitLink_Dob(LINK_T * link)
 
 /*
 功能描述:
-    判断单链表是否是空表。
+    判断链表是否是空表。
 参数说明:
-    dob_attr--已存在的单链表属性结点。
+    dob_attr--已存在的链表属性结点。
     pos--指定用于读取数据的结点地址。
     index--数据存储空间索引。
     elem--要保存的结点地址。
 返回值:
-    FALSE--非空单链表
+    FALSE--非空链表
     TRUE--只包含属性结点的空链表。
 */
 static Status ListEmpty_Dob(LINK_T dob_attr)
@@ -149,12 +149,12 @@ static Status ListEmpty_Dob(LINK_T dob_attr)
 
 /*
 功能描述:
-    将单链表重置为空表，并释放原链表结点空间
+    将链表重置为空表，并释放原链表结点空间
 参数说明:
-    dob_attr--单链表属性空间地址。
+    dob_attr--链表属性空间地址。
 返回值:
-    OK--清空单链表成功。
-    !OK--清空单链表失败。
+    OK--清空链表成功。
+    !OK--清空链表失败。
 */
 static void ClearList_Dob(LINK_T dob_attr)
 {
@@ -188,9 +188,9 @@ static void DestroyLink_Dob(LINK_T *link)
 
 /*
 功能描述:
-    向单链表插入一个头结点值.
+    向链表插入一个头结点值.
 参数说明:
-    dob_attr--单链表属性空间地址。
+    dob_attr--链表属性空间地址。
     val--指向实际数据的起始地址。
     type--实际数据类型.
     val_size--实际数据长度
@@ -235,9 +235,9 @@ static Status InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, si
 
 /*
 功能描述:
-    对每个结点调用visit()函数。显示整个单链表内容。
+    对每个结点调用visit()函数。显示整个链表内容。
 参数说明:
-    dob_attr--已存在的单链表属性结点。
+    dob_attr--已存在的链表属性结点。
     vist--每个结点都执行的函数指针。
 返回值:
     无
