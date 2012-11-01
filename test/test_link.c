@@ -42,9 +42,7 @@ static void link_test(link_type_t type)
     printf("link1 list:\n");
     funcs.link_traverse(link1,visitnode_link);
     funcs.destroy_link(&link1);
-    funcs.
     LogoutLinkFuncs(&funcs);
-
 }
 
 
