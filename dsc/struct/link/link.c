@@ -3,6 +3,7 @@
 #include "sys_lib.h"
 #include "sig_link.h"
 #include "dob_link.h"
+#include "cic_link.h"
 #include "link.h"
 
 void LogoutLinkFuncs(link_funcs_t *funcs)
@@ -27,9 +28,9 @@ Status RegisterLinkFuncs(link_funcs_t *funcs,link_type_t type, link_opt_funcs_t 
         case SIGNAL_LINK_LIST:
             RegisterLinkFuncs_Sig(funcs, ofunc->visit);
             break;
-		//case CIRCLE_LINK_LIST:
-		//	RegisterLinkFuncs_Cic(funcs, ofunc->visit);
-		//	break;
+		case CIRCLE_LINK_LIST:
+			RegisterLinkFuncs_Cic(funcs, ofunc->visit);
+			break;
         case DOUBLE_LINK_LIST:
             RegisterLinkFuncs_Dob(funcs, ofunc->visit);
             break;

@@ -5,9 +5,7 @@
 #include "err_num.h"
 #include "link.h"
 
-#ifdef _DEBUG_
-static Status visitnode(void *val);
-#endif
+
 #define LINK_T link_attr_t
 
 
