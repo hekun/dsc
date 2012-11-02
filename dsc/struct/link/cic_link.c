@@ -22,7 +22,7 @@ struct LINK_T
 };
 static Status   InitLink_Cic(LINK_T *link);
 static void     ClearList_Cic(LINK_T cic_attr);
-static Status   ListEmpty_Cic(LINK_T cic_attr);
+static Status   LinkEmpty_Cic(LINK_T cic_attr);
 static void     DestroyLink_Cic(LINK_T *link);
 static Status   MakeNode_Cic(cic_node_t * * p, v_type_t type, void * val, size_t size);
 static void     FreeNode_Cic(cic_node_t * *p);
@@ -131,7 +131,7 @@ static Status InitLink_Cic(LINK_T * link)
     FALSE--非空链表
     TRUE--只包含属性结点的空链表。
 */
-static Status ListEmpty_Cic(LINK_T cic_attr)
+static Status LinkEmpty_Cic(LINK_T cic_attr)
 {
     if((cic_attr->head == NULL) || (cic_attr->len == 0) || (cic_attr->tail == NULL))
     {
@@ -151,7 +151,7 @@ static Status ListEmpty_Cic(LINK_T cic_attr)
 */
 static void ClearList_Cic(LINK_T cic_attr)
 {
-    if(!ListEmpty_Cic(cic_attr))
+    if(!LinkEmpty_Cic(cic_attr))
     {
 	    cic_node_t *cur_node = cic_attr->head;
 	    cic_node_t *prior_node = cur_node;
@@ -212,7 +212,7 @@ static Status InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, si
     /*
     1.如果属性空间为空，则更新属性空间的所有成员。
     */
-    if(ListEmpty_Cic(cic_attr))
+    if(LinkEmpty_Cic(cic_attr))
     {
         cic_attr->head = node;
         cic_attr->tail = node;
@@ -248,7 +248,7 @@ static Status LinkTraverse_Cic(LINK_T cic_attr, opt_visit visit)
 	cic_node_t *tmp = cic_attr->head;
     void       *tmp_val = NULL;
 	Uint32_t   slLength = 0;
-	if(ListEmpty_Cic(cic_attr) == TRUE)
+	if(LinkEmpty_Cic(cic_attr) == TRUE)
 	{
 		log_msg(LOG_NO_FILE_LINE, "Signal link empty.");
 		return OK;
@@ -289,7 +289,7 @@ Status RegisterLinkFuncs_Cic(link_funcs_t *funcs,opt_visit visit)
     funcs->clear_link = ClearList_Cic;
     
     funcs->insert_first_data = InsertFirstData_Cic;
-    funcs->link_empty = ListEmpty_Cic;
+    funcs->link_empty = LinkEmpty_Cic;
     if(visit == NULL)
     {
         funcs->opt_func.visit = NULL;

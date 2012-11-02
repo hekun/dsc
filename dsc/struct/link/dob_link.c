@@ -24,7 +24,7 @@ struct LINK_T
 };
 static Status   InitLink_Dob(LINK_T *link);
 static void     ClearList_Dob(LINK_T dob_attr);
-static Status   ListEmpty_Dob(LINK_T dob_attr);
+static Status   LinkEmpty_Dob(LINK_T dob_attr);
 static void     DestroyLink_Dob(LINK_T *link);
 static Status   MakeNode_Dob(dob_node_t * * p, v_type_t type, void * val, size_t size);
 static void     FreeNode_Dob(dob_node_t * *p);
@@ -133,7 +133,7 @@ static Status InitLink_Dob(LINK_T * link)
     FALSE--非空链表
     TRUE--只包含属性结点的空链表。
 */
-static Status ListEmpty_Dob(LINK_T dob_attr)
+static Status LinkEmpty_Dob(LINK_T dob_attr)
 {
     if((dob_attr->head == NULL) || (dob_attr->len == 0) || (dob_attr->tail == NULL))
     {
@@ -153,7 +153,7 @@ static Status ListEmpty_Dob(LINK_T dob_attr)
 */
 static void ClearList_Dob(LINK_T dob_attr)
 {
-    if(!ListEmpty_Dob(dob_attr))
+    if(!LinkEmpty_Dob(dob_attr))
     {
 	    dob_node_t *cur_node = dob_attr->head;
 	    dob_node_t *prior_node = cur_node;
@@ -210,7 +210,7 @@ static Status InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, si
     /*
     1.如果属性空间为空，则更新属性空间的所有成员。
     */
-    if(ListEmpty_Dob(dob_attr))
+    if(LinkEmpty_Dob(dob_attr))
     {
         dob_attr->head = node;
         dob_attr->tail = node;
@@ -244,7 +244,7 @@ static Status LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit)
 	dob_node_t *tmp = dob_attr->head;
     void       *tmp_val = NULL;
 	Uint32_t   slLength = 0;
-	if(ListEmpty_Dob(dob_attr) == TRUE)
+	if(LinkEmpty_Dob(dob_attr) == TRUE)
 	{
 		log_msg(LOG_NO_FILE_LINE, "Signal link empty.");
 		return OK;
@@ -289,7 +289,7 @@ Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
     funcs->clear_link = ClearList_Dob;
     
     funcs->insert_first_data = InsertFirstData_Dob;
-    funcs->link_empty = ListEmpty_Dob;
+    funcs->link_empty = LinkEmpty_Dob;
     if(visit == NULL)
     {
         funcs->opt_func.visit = NULL;

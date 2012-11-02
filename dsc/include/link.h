@@ -18,7 +18,7 @@ typedef enum link_type_E
 
 
 typedef Status  (*InitLink) (LINK_T * link);
-typedef Status  (*ListEmpty) (LINK_T link);
+typedef Status  (*LinkEmpty) (LINK_T link);
 typedef void    (*ClearLink) (LINK_T link);
 typedef void    (*DestroyLink) (LINK_T *link);
 typedef Status  (*InsertFirstData) (LINK_T link, v_type_t type, void * val, size_t size);
@@ -37,7 +37,7 @@ typedef struct link_opt_funcs_S
 typedef struct link_funcs_S
 {
 	InitLink            init_link;
-    ListEmpty           link_empty;
+    LinkEmpty           link_empty;
     ClearLink           clear_link;
 	DestroyLink         destroy_link;
 	InsertFirstData     insert_first_data;

@@ -24,7 +24,7 @@ struct LINK_T
 };
 static Status   InitLink_Sig(LINK_T *link);
 static void     ClearList_Sig(LINK_T sig_attr);
-static Status   ListEmpty_Sig(LINK_T sig_attr);
+static Status   LinkEmpty_Sig(LINK_T sig_attr);
 static void     DestroyLink_Sig(LINK_T *link);
 static Status   MakeNode_Sig(sig_node_t * * p, v_type_t type, void * val, size_t size);
 static void     FreeNode_Sig(sig_node_t * *p);
@@ -134,7 +134,7 @@ static Status InitLink_Sig(LINK_T * link)
     FALSE--非空链表
     TRUE--只包含属性结点的空链表。
 */
-static Status ListEmpty_Sig(LINK_T sig_attr)
+static Status LinkEmpty_Sig(LINK_T sig_attr)
 {
     if((sig_attr->head == NULL) || (sig_attr->len == 0) || (sig_attr->tail == NULL))
     {
@@ -154,7 +154,7 @@ static Status ListEmpty_Sig(LINK_T sig_attr)
 */
 static void ClearList_Sig(LINK_T sig_attr)
 {
-    if(!ListEmpty_Sig(sig_attr))
+    if(!LinkEmpty_Sig(sig_attr))
     {
 	    sig_node_t *cur_node = sig_attr->head;
 	    sig_node_t *prior_node = cur_node;
@@ -213,7 +213,7 @@ static Status InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, si
     /*
     1.如果属性空间为空，则更新属性空间的所有成员。
     */
-    if(ListEmpty_Sig(sig_attr))
+    if(LinkEmpty_Sig(sig_attr))
     {
         sig_attr->head = node;
         sig_attr->tail = node;
@@ -246,7 +246,7 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
 	sig_node_t *tmp = sig_attr->head;
     void       *tmp_val = NULL;
 	Uint32_t   slLength = 0;
-	if(ListEmpty_Sig(sig_attr) == TRUE)
+	if(LinkEmpty_Sig(sig_attr) == TRUE)
 	{
 		log_msg(LOG_NO_FILE_LINE, "Signal link empty.");
 		return OK;
@@ -283,7 +283,7 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     funcs->clear_link = ClearList_Sig;
     
     funcs->insert_first_data = InsertFirstData_Sig;
-    funcs->link_empty = ListEmpty_Sig;
+    funcs->link_empty = LinkEmpty_Sig;
     if(visit == NULL)
     {
         funcs->opt_func.visit = NULL;
