@@ -30,7 +30,7 @@ static Status   MakeNode_Sig(sig_node_t * * p, v_type_t type, void * val, size_t
 static void     FreeNode_Sig(sig_node_t * *p);
 static Status   InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
-
+static void     DelFirstData_Sig(LINK_T sig_attr, v_type_t * ptype, void * * pval, size_t * psize);
 /*
 功能描述:
     创建链表节点
@@ -271,7 +271,42 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
     printf(".\n");
     return OK;
 }
-
+/*
+功能描述:
+    从链表中断开头节点，获取头节点中的数据指针。
+参数说明:
+    sig_attr--链表属性空间。
+    ptype--存储节点数据类型。
+    pval--存储数据二级地址。
+    psize--存储数据空间大小。
+返回值:
+    无
+注意事项:
+    注意要对vdata指向的数据进行手动销毁。
+作者:
+    何昆
+完成日期:
+    2012-11-02
+*/
+static void DelFirstData_Sig(LINK_T sig_attr,v_type_t *ptype, void **pval, size_t *psize)
+{
+    assert(!LinkEmpty_Sig(sig_attr));
+    sig_node_t *node = sig_attr->head;
+    *ptype = node->data->type;
+    *psize = node->data->val_size;
+    *pval = node->data->val;
+    if(sig_attr->len == 1)
+    {
+        sig_attr->head = sig_attr->tail = NULL;
+    }
+    else
+    {
+        sig_attr->head = sig_attr->head->next;
+    }
+    Free((void * *)&node->data);
+    Free((void * *)&node);
+    sig_attr->len--;
+}
 
 
 Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
@@ -283,6 +318,7 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     funcs->clear_link = ClearList_Sig;
     
     funcs->insert_first_data = InsertFirstData_Sig;
+    funcs->del_first_data = DelFirstData_Sig;
     funcs->link_empty = LinkEmpty_Sig;
     if(visit == NULL)
     {

@@ -14,10 +14,10 @@ Int32_t main(void)
 {
     log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK TEST--------");
     link_test(SIGNAL_LINK_LIST);
-    log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK TEST--------");
-    link_test(DOUBLE_LINK_LIST);
-    log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK TEST--------");
-    link_test(CIRCLE_LINK_LIST);    
+    //log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK TEST--------");
+    //link_test(DOUBLE_LINK_LIST);
+    //log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK TEST--------");
+    //link_test(CIRCLE_LINK_LIST);    
     return OK;
 }
 static void link_test(link_type_t type)
@@ -29,10 +29,17 @@ static void link_test(link_type_t type)
     optf.visit = visitnode_link;
     RegisterLinkFuncs(&funcs, type, &optf);    
     link_attr_t link1 = NULL;
+    v_data_t * del_node = NULL;
+    
     rc = funcs.init_link(&link1);
     if(rc != OK)
     {
         err_quit(LOG_FILE_LINE,"funcs.init_link failed. rc=%d",rc);
+    }
+    rc = init_vdata(&del_node, V_UNKNOWN_TYPE, NULL, 0);
+    if(rc != OK)
+    {
+        err_quit(LOG_FILE_LINE,"init_vdata failed, rc=%d.",rc);
     }
     for(i=0; i<5; i++)
     {
@@ -45,6 +52,8 @@ static void link_test(link_type_t type)
     }
     printf("link1 list:\n");
     funcs.link_traverse(link1,visitnode_link);
+
+    funcs.del_first_data(link1, &del_node->type, &del_node->val, &del_node->val_size);
     funcs.destroy_link(&link1);
     LogoutLinkFuncs(&funcs);
 }
