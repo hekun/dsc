@@ -75,7 +75,7 @@ static Status MakeNode_Dob(dob_node_t **p, v_type_t type, void * val, size_t siz
 功能描述:
     释放节点数据
 参数说明:
-
+    p--释放节点的二级指针
 返回值:
 
 注意事项:
@@ -131,9 +131,6 @@ static Status InitLink_Dob(LINK_T * link)
     判断链表是否是空表。
 参数说明:
     dob_attr--已存在的链表属性结点。
-    pos--指定用于读取数据的结点地址。
-    index--数据存储空间索引。
-    elem--要保存的结点地址。
 返回值:
     FALSE--非空链表
     TRUE--只包含属性结点的空链表。
