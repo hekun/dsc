@@ -28,6 +28,7 @@ static Status   MakeNode_Cic(cic_node_t * * p, v_type_t type, void * val, size_t
 static void     FreeNode_Cic(cic_node_t * *p);
 static Status   InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
 static Status   LinkTraverse_Cic(LINK_T cic_attr, opt_visit visit);
+static void     DelFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
 
 /*
 功能描述:
@@ -231,6 +232,45 @@ static Status InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, si
     return rc;
 }
 
+/*
+功能描述:
+    从链表中断开头节点，获取头节点中的数据指针。
+参数说明:
+    cic_attr--链表属性空间。
+    type--存储节点数据类型。
+    val--存储数据存储区首地址。
+    size--存储数据空间大小。
+返回值:
+    无
+注意事项:
+    type,size用于检测val指向的存储空间是否可以存储节点实际数据。
+    val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
+    见test_link.c文件的funcs.del_first_data函数调用。
+作者:
+    He kun
+完成日期:
+    2012-11-02
+*/
+static void DelFirstData_Cic(LINK_T cic_attr,v_type_t type, void *val, size_t size)
+{
+    assert(!LinkEmpty_Cic(cic_attr) && val
+        && type == cic_attr->head->data->type
+        && size == cic_attr->head->data->val_size);
+    cic_node_t *node = cic_attr->head;
+    Memcpy(val, node->data->val, size, size);
+    if(cic_attr->len == 1)
+    {
+        cic_attr->head = cic_attr->tail = NULL;
+    }
+    else
+    {
+        cic_attr->head = cic_attr->head->next;
+        cic_attr->tail->next = cic_attr->head;
+    }
+    FreeNode_Cic(&node);
+    cic_attr->len--;
+}
+
 
 /*
 功能描述:
@@ -289,6 +329,7 @@ Status RegisterLinkFuncs_Cic(link_funcs_t *funcs,opt_visit visit)
     funcs->clear_link = ClearList_Cic;
     
     funcs->insert_first_data = InsertFirstData_Cic;
+    funcs->del_first_data = DelFirstData_Cic;
     funcs->link_empty = LinkEmpty_Cic;
     if(visit == NULL)
     {

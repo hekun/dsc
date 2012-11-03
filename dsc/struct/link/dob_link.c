@@ -29,6 +29,7 @@ static void     DestroyLink_Dob(LINK_T *link);
 static Status   MakeNode_Dob(dob_node_t * * p, v_type_t type, void * val, size_t size);
 static void     FreeNode_Dob(dob_node_t * *p);
 static Status   InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
+static void     DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size);
 static Status   LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit);
 
 /*
@@ -230,6 +231,47 @@ static Status InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, si
 
 /*
 功能描述:
+    从链表中断开头节点，获取头节点中的数据指针。
+参数说明:
+    dob_attr--链表属性空间。
+    type--存储节点数据类型。
+    val--存储数据存储区首地址。
+    size--存储数据空间大小。
+返回值:
+    无
+注意事项:
+    type,size用于检测val指向的存储空间是否可以存储节点实际数据。
+    val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
+    见test_link.c文件的funcs.del_first_data函数调用。
+作者:
+    He kun
+完成日期:
+    2012-11-02
+*/
+static void DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size)
+{
+    assert(!LinkEmpty_Dob(dob_attr) && val
+        && type == dob_attr->head->data->type
+        && size == dob_attr->head->data->val_size);
+    dob_node_t *node = dob_attr->head;
+    Memcpy(val, node->data->val, size, size);
+    if(dob_attr->len == 1)
+    {
+        dob_attr->head = dob_attr->tail = NULL;
+    }
+    else
+    {
+        dob_attr->head = dob_attr->head->next;
+        dob_attr->head->prior = NULL;
+    }
+    FreeNode_Dob(&node);
+    dob_attr->len--;
+}
+
+
+
+/*
+功能描述:
     对每个结点调用visit()函数。显示整个链表内容。
 参数说明:
     dob_attr--已存在的链表属性结点。
@@ -260,13 +302,15 @@ static Status LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit)
 	printf("NULL.\n");
     printf("After invert:");
     tmp = dob_attr->tail;
-    while(tmp)
+    while(tmp->prior)
     {
         tmp_val = get_vdata(tmp->data);
         visit(tmp_val);
         tmp = tmp->prior;
         printf("<-");
     }
+    tmp_val = get_vdata(tmp->data);
+    visit(tmp_val);
 	printf("\nhead =");
     tmp_val = get_vdata(dob_attr->head->data);
     visit(tmp_val);
@@ -287,8 +331,8 @@ Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
     funcs->init_link = InitLink_Dob;
     funcs->destroy_link = DestroyLink_Dob;
     funcs->clear_link = ClearList_Dob;
-    
     funcs->insert_first_data = InsertFirstData_Dob;
+    funcs->del_first_data = DelFirstData_Dob;
     funcs->link_empty = LinkEmpty_Dob;
     if(visit == NULL)
     {

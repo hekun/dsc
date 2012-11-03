@@ -276,7 +276,7 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
 参数说明:
     sig_attr--链表属性空间。
     type--存储节点数据类型。
-    val--存储数据二级地址。
+    val--存储数据存储区首地址。
     size--存储数据空间大小。
 返回值:
     无
