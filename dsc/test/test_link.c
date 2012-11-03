@@ -29,17 +29,11 @@ static void link_test(link_type_t type)
     optf.visit = visitnode_link;
     RegisterLinkFuncs(&funcs, type, &optf);    
     link_attr_t link1 = NULL;
-    v_data_t * del_node = NULL;
     
     rc = funcs.init_link(&link1);
     if(rc != OK)
     {
         err_quit(LOG_FILE_LINE,"funcs.init_link failed. rc=%d",rc);
-    }
-    rc = init_vdata(&del_node, V_UNKNOWN_TYPE, NULL, 0);
-    if(rc != OK)
-    {
-        err_quit(LOG_FILE_LINE,"init_vdata failed, rc=%d.",rc);
     }
     for(i=0; i<5; i++)
     {
@@ -50,10 +44,13 @@ static void link_test(link_type_t type)
             err_quit(LOG_FILE_LINE,"funcs.insert_first_data,rc=%d.",rc);
         }
     }
-    printf("link1 list:\n");
+    printf("link1 list:");
     funcs.link_traverse(link1,visitnode_link);
 
-    funcs.del_first_data(link1, &del_node->type, &del_node->val, &del_node->val_size);
+    funcs.del_first_data(link1, V_INT, (void *)&i, sizeof(i));
+    printf("The del first data=%d.\n",i);
+    printf("After del_firt_data, link1 list:");
+    funcs.link_traverse(link1,visitnode_link);
     funcs.destroy_link(&link1);
     LogoutLinkFuncs(&funcs);
 }

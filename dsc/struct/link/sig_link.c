@@ -30,7 +30,7 @@ static Status   MakeNode_Sig(sig_node_t * * p, v_type_t type, void * val, size_t
 static void     FreeNode_Sig(sig_node_t * *p);
 static Status   InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
-static void     DelFirstData_Sig(LINK_T sig_attr, v_type_t * ptype, void * * pval, size_t * psize);
+static void     DelFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 /*
 功能描述:
     创建链表节点
@@ -161,7 +161,6 @@ static void ClearList_Sig(LINK_T sig_attr)
 	    while(cur_node)
 	    {
 	        cur_node = cur_node->next;
-            destroy_vdata(&prior_node->data);
 	        FreeNode_Sig(&prior_node);
 	        prior_node = cur_node;
 	    }
@@ -260,12 +259,12 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
         printf("->");
 	}
 	printf("NULL.\n");
-	printf("head =");
+	printf("head = ");
     tmp_val = get_vdata(sig_attr->head->data);
     visit(tmp_val);
     printf(",len = %d,",slLength);
 	printf("attr->len=%d,",sig_attr->len);
-    printf("tail =");
+    printf("tail = ");
     tmp_val = get_vdata(sig_attr->tail->data);
     visit(tmp_val);
     printf(".\n");
@@ -276,25 +275,27 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
     从链表中断开头节点，获取头节点中的数据指针。
 参数说明:
     sig_attr--链表属性空间。
-    ptype--存储节点数据类型。
-    pval--存储数据二级地址。
-    psize--存储数据空间大小。
+    type--存储节点数据类型。
+    val--存储数据二级地址。
+    size--存储数据空间大小。
 返回值:
     无
 注意事项:
-    注意要对vdata指向的数据进行手动销毁。
+    type,size用于检测val指向的存储空间是否可以存储节点实际数据。
+    val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
+    见test_link.c文件的funcs.del_first_data函数调用。
 作者:
     何昆
 完成日期:
     2012-11-02
 */
-static void DelFirstData_Sig(LINK_T sig_attr,v_type_t *ptype, void **pval, size_t *psize)
+static void DelFirstData_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t size)
 {
-    assert(!LinkEmpty_Sig(sig_attr));
+    assert(!LinkEmpty_Sig(sig_attr) && val
+        && type == sig_attr->head->data->type
+        && size == sig_attr->head->data->val_size);
     sig_node_t *node = sig_attr->head;
-    *ptype = node->data->type;
-    *psize = node->data->val_size;
-    *pval = node->data->val;
+    Memcpy(val, node->data->val, size, size);
     if(sig_attr->len == 1)
     {
         sig_attr->head = sig_attr->tail = NULL;
@@ -303,8 +304,7 @@ static void DelFirstData_Sig(LINK_T sig_attr,v_type_t *ptype, void **pval, size_
     {
         sig_attr->head = sig_attr->head->next;
     }
-    Free((void * *)&node->data);
-    Free((void * *)&node);
+    FreeNode_Sig(&node);
     sig_attr->len--;
 }
 
