@@ -24,7 +24,7 @@ typedef void    (*DestroyLink) (LINK_T *link);
 typedef Status  (*InsertFirstData) (LINK_T link, v_type_t type, void * val, size_t size);
 typedef Status  (*opt_visit) (void *val);
 typedef Status  (*LinkTraverse) (LINK_T link, opt_visit visit);
-typedef void    (*DelFirstData) (LINK_T sig_attr, v_type_t * ptype, void * * pval, size_t * psize);
+typedef void    (*DelFirstData) (LINK_T sig_attr,v_type_t type, void *val, size_t size);
 
 
 

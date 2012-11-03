@@ -1,7 +1,7 @@
 include ../Makefile.config
 CFLAGS=-g -shared -fPIC -Wall -I../include
-static_target =$(LIBS)/libdbs.a
-dynamic_target =$(LIBS)/libdbs.so
+static_target =$(LIBS)/libdsc.a
+dynamic_target =$(LIBS)/libdsc.so
 all: $(static_target) $(dynamic_target)
 target_objects=link.o sig_link.o v_data.o dob_link.o cic_link.o
 $(static_target): ${target_objects}
