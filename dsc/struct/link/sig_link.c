@@ -285,7 +285,7 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
     val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
     见test_link.c文件的funcs.del_first_data函数调用。
 作者:
-    何昆
+    He kun
 完成日期:
     2012-11-02
 */
