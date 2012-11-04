@@ -15,8 +15,8 @@ typedef enum stack_type_E
 }stack_type_t;
 
 typedef Status  (*opt_visit) (void *val);
-typedef Status  InitStack(STACK_T stack, Int32_t elem_total);
-typedef Status  DestroyStack(STACK_T *stack);
+typedef Status  InitStack(STACK_T *stack, stack_type_t type, opt_visit visit);
+typedef void    DestroyStack(STACK_T *stack);
 typedef Status  ClearStack(STACK_T stack);
 typedef Status  StackEmpty(STACK_T stack);
 typedef void    StackLength(STACK_T stack, Int32_t *elem_total);
