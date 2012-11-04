@@ -1,4 +1,4 @@
-DIRS=link
+DIRS=link stack
 all:
 	@for i in $(DIRS); do \
 		echo Making all in $${i}; \
