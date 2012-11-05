@@ -31,6 +31,8 @@ static void     FreeNode_Sig(sig_node_t * *p);
 static Status   InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
 static void     DelFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
+static void     GetFirstData_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
+
 /*
 功能描述:
     创建链表节点
@@ -231,7 +233,27 @@ static Status InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, si
     sig_attr->len++;
     return rc;
 }
+/*
+功能描述:
 
+参数说明:
+
+返回值:
+
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static void GetFirstData_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size)
+{
+    assert(sig_attr && !LinkEmpty_Sig(sig_attr));
+    if(sig_attr->head->data->type == type && 
+       sig_attr->head->data->val_size == size)
+    {
+        *val = sig_attr->head->data->val;
+    }
+}
 /*
 功能描述:
     对每个结点调用visit()函数。显示整个链表内容。
@@ -322,6 +344,7 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     
     funcs->insert_first_data = InsertFirstData_Sig;
     funcs->del_first_data = DelFirstData_Sig;
+    funcs->get_first_data = GetFirstData_Sig;
     funcs->link_empty = LinkEmpty_Sig;
     if(visit == NULL)
     {

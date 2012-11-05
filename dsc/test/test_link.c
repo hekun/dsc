@@ -12,10 +12,10 @@ static Status visitnode_link(void *val);
 
 Int32_t main(void)
 {
-    //log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK TEST--------");
-    //link_test(SIGNAL_LINK_LIST);
-    log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK TEST--------");
-    link_test(DOUBLE_LINK_LIST);
+    log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK TEST--------");
+    link_test(SIGNAL_LINK_LIST);
+    //log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK TEST--------");
+    //link_test(DOUBLE_LINK_LIST);
     //log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK TEST--------");
     //link_test(CIRCLE_LINK_LIST);    
     return OK;
@@ -24,6 +24,7 @@ static void link_test(link_type_t type)
 {
     Status rc = OK;
     Int32_t i = 0;
+    Int32_t *p_val = NULL;
     link_funcs_t funcs;
     link_opt_funcs_t optf;
     optf.visit = visitnode_link;
@@ -51,6 +52,9 @@ static void link_test(link_type_t type)
     printf("The del first data=%d.\n",i);
     printf("After del_firt_data, link1 list:");
     funcs.link_traverse(link1,visitnode_link);
+    
+    funcs.get_first_data(link1,V_INT, (void **)&p_val, sizeof(*p_val));
+    printf("The first data:%d.\n", *p_val);
     funcs.destroy_link(&link1);
     LogoutLinkFuncs(&funcs);
 }
