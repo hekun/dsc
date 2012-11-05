@@ -14,6 +14,7 @@ typedef struct depand_funcs_S
     DelFirstData    del_first_data;
     ClearLink       clear_link;
     LinkEmpty       link_empty;
+    GetFirstData    get_first_data;
     LinkTraverse    link_traverse;
 }depand_funcs_t;
 
@@ -28,6 +29,7 @@ static void DestroyStack_Link(STACK_T * stack);
 static Status Push_Link(STACK_T stack, v_type_t type, void * val, size_t size);
 static Status StackTraverse_Link (STACK_T stack, stack_visit visit);
 static void Pop_Link(STACK_T stack, v_type_t type, void * val, size_t size);
+static Status GetTop_Link(STACK_T stack, v_type_t type, void **val, size_t size);
 static void ClearStack_Link(STACK_T stack);
 static Status StackEmpty_Link(STACK_T stack);
 
@@ -74,6 +76,7 @@ static Status RegisterDepdFuncs_Stack(depand_funcs_t *s_depdf,stack_type_t type,
         s_depdf->del_first_data = l_func.del_first_data;
         s_depdf->clear_link = l_func.clear_link;
         s_depdf->link_empty = l_func.link_empty;
+        s_depdf->get_first_data = l_func.get_first_data;
         s_depdf->link_traverse = l_func.link_traverse;
     }
     return rc;
@@ -202,6 +205,36 @@ static void Pop_Link(STACK_T stack,v_type_t type, void *val, size_t size)
     assert(stack && stack->attr);
     stack->depdf.del_first_data(stack->attr,type,val,size);
 }
+/*
+功能描述:
+    获取链栈栈顶数据。
+参数说明:
+    stack--已存在的链栈属性空间。
+    type--存储节点数据类型。
+    val--存储链栈数据首地址。
+    size--存储数据空间大小。    
+返回值:
+    ERR_EMPTY_LIST--空链栈。
+    OK--获取栈顶数据成功。
+注意事项:
+    无。
+作者:
+    何昆
+日期:
+    2012-11-05
+*/
+static Status GetTop_Link(STACK_T stack, v_type_t type, void **val, size_t size)
+{
+    assert(stack && stack->attr);
+    if(StackEmpty_Link(stack))
+    {
+        err_ret(LOG_NO_FILE_LINE,"empty stack.");
+        return ERR_EMPTY_LIST;
+    }
+    stack->depdf.get_first_data(stack->attr, type, val, size);
+    return OK;
+}
+
 
 /*
 功能描述:
@@ -283,6 +316,7 @@ void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, stack
     stk_funcs->stack_traverse = StackTraverse_Link;
     stk_funcs->clear_stack = ClearStack_Link;
     stk_funcs->stack_empty = StackEmpty_Link;
+    stk_funcs->get_top = GetTop_Link;
 }
 
 void LogoutStackFuncs_Link(Stack_funcs_t * stk_funcs)

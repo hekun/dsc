@@ -42,11 +42,15 @@ static void stack_test(stack_type_t type)
     }
     if(rc == OK)
     {
+        Int32_t *p_val = NULL;
         stk_funcs.stack_traverse(stk, visitnode_stack);
         stk_funcs.pop(stk, V_INT, &i, sizeof(i));
         printf("Stack pop data: %d.\n",i);
         printf("After Pop , stack:");
         stk_funcs.stack_traverse(stk, visitnode_stack);
+        printf("The top data:");
+        stk_funcs.get_top(stk, V_INT,(void **)&p_val, sizeof(*p_val));
+        printf("%d.\n", *p_val);
     }
     stk_funcs.clear_stack(stk);
     if(!stk_funcs.stack_empty(stk))
