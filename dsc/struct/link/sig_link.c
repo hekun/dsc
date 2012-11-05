@@ -235,11 +235,14 @@ static Status InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, si
 }
 /*
 功能描述:
-
+    获取链表中的头节点数据。
 参数说明:
-
+    sig_attr--链表属性空间首地址。
+    type--链表节点类型。
+    val--存储实际数据首地址。
+    size--数据存储空间大小。
 返回值:
-
+    无。
 作者:
     He kun
 日期:

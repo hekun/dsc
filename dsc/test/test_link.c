@@ -14,10 +14,10 @@ Int32_t main(void)
 {
     log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK TEST--------");
     link_test(SIGNAL_LINK_LIST);
-    //log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK TEST--------");
-    //link_test(DOUBLE_LINK_LIST);
-    //log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK TEST--------");
-    //link_test(CIRCLE_LINK_LIST);    
+    log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK TEST--------");
+    link_test(DOUBLE_LINK_LIST);
+    log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK TEST--------");
+    link_test(CIRCLE_LINK_LIST);    
     return OK;
 }
 static void link_test(link_type_t type)

@@ -31,6 +31,7 @@ static void     FreeNode_Dob(dob_node_t * *p);
 static Status   InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
 static void     DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size);
 static Status   LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit);
+static void     GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size);
 
 /*
 功能描述:
@@ -268,7 +269,30 @@ static void DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t si
     dob_attr->len--;
 }
 
-
+/*
+功能描述:
+    获取链表中的头节点数据。
+参数说明:
+    dob_attr--链表属性空间首地址。
+    type--链表节点类型。
+    val--存储实际数据首地址。
+    size--数据存储空间大小。
+返回值:
+    无。
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static void GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size)
+{
+    assert(dob_attr && !LinkEmpty_Dob(dob_attr));
+    if(dob_attr->head->data->type == type && 
+       dob_attr->head->data->val_size == size)
+    {
+        *val = dob_attr->head->data->val;
+    }
+}
 
 /*
 功能描述:
@@ -333,6 +357,7 @@ Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
     funcs->clear_link = ClearList_Dob;
     funcs->insert_first_data = InsertFirstData_Dob;
     funcs->del_first_data = DelFirstData_Dob;
+    funcs->get_first_data = GetFirstData_Dob;
     funcs->link_empty = LinkEmpty_Dob;
     if(visit == NULL)
     {

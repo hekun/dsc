@@ -29,7 +29,7 @@ static void     FreeNode_Cic(cic_node_t * *p);
 static Status   InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
 static Status   LinkTraverse_Cic(LINK_T cic_attr, opt_visit visit);
 static void     DelFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
-
+static void     GetFirstData_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size);
 /*
 功能描述:
     创建链表节点
@@ -273,7 +273,30 @@ static void DelFirstData_Cic(LINK_T cic_attr,v_type_t type, void *val, size_t si
     FreeNode_Cic(&node);
     cic_attr->len--;
 }
-
+/*
+功能描述:
+    获取链表中的头节点数据。
+参数说明:
+    cic_attr--链表属性空间首地址。
+    type--链表节点类型。
+    val--存储实际数据首地址。
+    size--数据存储空间大小。
+返回值:
+    无。
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static void GetFirstData_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size)
+{
+    assert(cic_attr && !LinkEmpty_Cic(cic_attr));
+    if(cic_attr->head->data->type == type && 
+       cic_attr->head->data->val_size == size)
+    {
+        *val = cic_attr->head->data->val;
+    }
+}
 
 /*
 功能描述:
@@ -330,7 +353,7 @@ Status RegisterLinkFuncs_Cic(link_funcs_t *funcs,opt_visit visit)
     funcs->init_link = InitLink_Cic;
     funcs->destroy_link = DestroyLink_Cic;
     funcs->clear_link = ClearList_Cic;
-    
+    funcs->get_first_data = GetFirstData_Cic;
     funcs->insert_first_data = InsertFirstData_Cic;
     funcs->del_first_data = DelFirstData_Cic;
     funcs->link_empty = LinkEmpty_Cic;
