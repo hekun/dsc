@@ -46,7 +46,7 @@ typedef struct Stack_funcs_S
 }Stack_funcs_t;
 
 void  RegisterStackFuncs(Stack_funcs_t * stk_funcs, stack_type_t type, stack_visit visit);
-void    LogoutStackFuncs(Stack_funcs_t * funcs, stack_type_t type);
+void  LogoutStackFuncs(Stack_funcs_t * funcs, stack_type_t type);
 
 
 #undef STACK_T

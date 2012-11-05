@@ -122,6 +122,9 @@ static Status InitLink_Sig(LINK_T * link)
     tmp_attr->head = NULL;
     tmp_attr->tail = NULL;
     tmp_attr->len = 0;
+#ifdef _DEBUG
+    log_msg(LOG_NO_FILE_LINE, "Malloc Link");
+#endif
     return rc;    
 }
 
@@ -179,7 +182,7 @@ static void DestroyLink_Sig(LINK_T *link)
     ClearList_Sig(*link);
     Free((void * *)link);
 #ifdef _DEBUG
-    log_msg(LOG_FILE_LINE, "FREE Link");
+    log_msg(LOG_NO_FILE_LINE, "FREE Link");
 #endif
 }
 
@@ -323,9 +326,9 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     if(visit == NULL)
     {
         funcs->opt_func.visit = NULL;
-		#ifdef _DEBUG
+#ifdef _DEBUG
         log_msg(LOG_NO_FILE_LINE, "opt_visit未定义，LinkTraverse函数无法使用。");
-		#endif
+#endif
 		funcs->link_traverse = NULL;
     }
     else

@@ -19,9 +19,9 @@ Status init_vdata(v_data_t **vdata, v_type_t type,
             err_ret(LOG_FILE_LINE, "Malloc failed.");
             return ERROR;
         }
-		#ifdef _DEBUG
-		log_msg(LOG_FILE_LINE, "Malloc v_Data");
-		#endif
+#ifdef _DEBUG
+        log_msg(LOG_NO_FILE_LINE, "Malloc v_Data");
+#endif
         tmp_vdata->type = V_UNKNOWN_TYPE;
         tmp_vdata->val = NULL;
         tmp_vdata->val_size = 0;
@@ -51,9 +51,9 @@ Status init_vdata(v_data_t **vdata, v_type_t type,
                 err_ret(LOG_FILE_LINE, "Malloc failed.");
                 return ERROR;
             }
-			#ifdef _DEBUG
-			log_msg(LOG_FILE_LINE, "Malloc vdata->val");
-			#endif
+#ifdef _DEBUG
+            log_msg(LOG_NO_FILE_LINE, "Malloc vdata->val");
+#endif
             tmp_vdata->val_size = val_size;
             if((val != NULL) && (val_size > 0))
             {
@@ -77,16 +77,16 @@ void destroy_vdata(v_data_t **vdata)
     if(!empty_vdata(*vdata) && ((*vdata)->type != V_POINT))
     {
         Free((void * *)&(*vdata)->val);
-		#ifdef _DEBUG
-		log_msg(LOG_FILE_LINE, "FREE vdata->val");
-		#endif
+#ifdef _DEBUG
+        log_msg(LOG_NO_FILE_LINE, "FREE vdata->val");
+#endif
     }
     (*vdata)->type = V_UNKNOWN_TYPE;
     (*vdata)->val_size = 0;
     Free((void * *)vdata);
-	#ifdef _DEBUG
-	log_msg(LOG_FILE_LINE, "FREE vdata");
-	#endif
+#ifdef _DEBUG
+    log_msg(LOG_NO_FILE_LINE, "FREE vdata");
+#endif
 }
 Status set_vdata(v_data_t *vdata, v_type_t type,
                       void *pdata, size_t data_size)
@@ -110,9 +110,9 @@ Status set_vdata(v_data_t *vdata, v_type_t type,
             err_ret(LOG_FILE_LINE, "Malloc failed.");
             return rc;
         }
-		#ifdef _DEBUG
-		log_msg(LOG_FILE_LINE, "Malloc vdata->val");
-		#endif		
+#ifdef _DEBUG
+        log_msg(LOG_NO_FILE_LINE, "Malloc vdata->val");
+#endif		
         vdata->val_size = data_size;
         vdata->type = type;
         rc = Memcpy(vdata->val, pdata, vdata->val_size, data_size);

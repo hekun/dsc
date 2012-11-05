@@ -1,19 +1,21 @@
+#include <assert.h>
 #include "v_data.h"
 #include "sys_lib.h"
 #include "stack.h"
 
 
 static Status visitnode_stack(void *val);
+static void stack_test(stack_type_t type);
 
 
 Int32_t main(void)
 {
-    //log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK STACK TEST--------");
-    //stack_test(SIGNAL_LINK_LIST);
+    log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK STACK TEST--------");
+    stack_test(STACK_SIGNAL_LINK_LIST);
     log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK STACK TEST--------");
     stack_test(STACK_SIGNAL_LINK_LIST);
-    //log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK STACK TEST--------");
-    //stack_test(CIRCLE_LINK_LIST);    
+    log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK STACK TEST--------");
+    stack_test(STACK_CIRCLE_LINK_LIST);    
     return OK;
 }
 static void stack_test(stack_type_t type)

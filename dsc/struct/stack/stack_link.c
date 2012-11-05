@@ -20,7 +20,7 @@ struct STACK_T
 };
 static Status RegisterDepdFuncs_Stack(depand_funcs_t * s_depdf, stack_type_t type, opt_visit visit);
 static Status InitStack_Link(STACK_T * stack, stack_type_t type, opt_visit visit);
-static Status DestroyStack_Link(STACK_T * stack);
+static void DestroyStack_Link(STACK_T * stack);
 
 
 
@@ -116,13 +116,13 @@ static void DestroyStack_Link(STACK_T *stack)
     {
         if((*stack)->attr)
         {
-            (*stack)->depdf.destroy_link((*stack)->attr);
+            (*stack)->depdf.destroy_link(&(*stack)->attr);
         }
         Free((void * *) stack);
     }
 }
 
-void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, opt_visit visit)
+void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, stack_visit visit)
 {
     assert(type != UNKNOWN_STACK);
     stk_funcs->destroy_stack = DestroyStack_Link;
