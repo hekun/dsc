@@ -8,9 +8,13 @@
 #define STACK_T  stack_attr_t
 typedef struct depand_funcs_S
 {
-    InitLink    init_link;
-    DestroyLink destroy_link;
-    
+    InitLink        init_link;
+    DestroyLink     destroy_link;
+    InsertFirstData insert_first_data;
+    DelFirstData    del_first_data;
+    ClearLink       clear_link;
+    LinkEmpty       link_empty;
+    LinkTraverse    link_traverse;
 }depand_funcs_t;
 
 struct STACK_T
@@ -21,8 +25,11 @@ struct STACK_T
 static Status RegisterDepdFuncs_Stack(depand_funcs_t * s_depdf, stack_type_t type, opt_visit visit);
 static Status InitStack_Link(STACK_T * stack, stack_type_t type, opt_visit visit);
 static void DestroyStack_Link(STACK_T * stack);
-
-
+static Status Push_Link(STACK_T stack, v_type_t type, void * val, size_t size);
+static Status StackTraverse_Link (STACK_T stack, stack_visit visit);
+static void Pop_Link(STACK_T stack, v_type_t type, void * val, size_t size);
+static void ClearStack_Link(STACK_T stack);
+static Status StackEmpty_Link(STACK_T stack);
 
 /*
 功能描述:
@@ -34,6 +41,10 @@ static void DestroyStack_Link(STACK_T * stack);
 返回值:
     OK--注册成功。
     !OK--获取链表函数失败。
+作者:
+    He kun
+开发日期:
+    2012-11-04
 */
 static Status RegisterDepdFuncs_Stack(depand_funcs_t *s_depdf,stack_type_t type, opt_visit visit)
 {
@@ -59,6 +70,11 @@ static Status RegisterDepdFuncs_Stack(depand_funcs_t *s_depdf,stack_type_t type,
     {
         s_depdf->init_link = l_func.init_link;
         s_depdf->destroy_link = l_func.destroy_link;
+        s_depdf->insert_first_data = l_func.insert_first_data;
+        s_depdf->del_first_data = l_func.del_first_data;
+        s_depdf->clear_link = l_func.clear_link;
+        s_depdf->link_empty = l_func.link_empty;
+        s_depdf->link_traverse = l_func.link_traverse;
     }
     return rc;
 }
@@ -80,7 +96,7 @@ static Status RegisterDepdFuncs_Stack(depand_funcs_t *s_depdf,stack_type_t type,
 作者:
     He kun
 开发日期:
-2012-11-04
+    2012-11-04
 */
 static Status InitStack_Link(STACK_T *stack, stack_type_t type, opt_visit visit)
 {
@@ -109,7 +125,18 @@ static Status InitStack_Link(STACK_T *stack, stack_type_t type, opt_visit visit)
     }
     return rc;
 }
-
+/*
+功能描述:
+    销毁整个链栈及链栈属性空间。
+参数说明:
+    stack--已存在的链栈属性空间。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
 static void DestroyStack_Link(STACK_T *stack)
 {
     if(*stack)
@@ -121,12 +148,141 @@ static void DestroyStack_Link(STACK_T *stack)
         Free((void * *) stack);
     }
 }
+/*
+功能描述:
+    向链栈中压入数据
+参数说明:
+    stack--已存在的链栈属性空间。
+    type--数据的实际类型。
+    val--指向实际数据类型的一级指针。
+        如果实际数据是C语言内建的非指针类型，val存储该数据类型的地址。
+        如果实际数据是一级指针，val存储指针值。
+        如果实际数据是其他类型，则先将数据存入一个结构体中,val存储该结构体地址。
+    val_size--实际数据类型大小。
+返回值:
+    OK--成功；
+    !OK--失败;
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static Status Push_Link(STACK_T stack, v_type_t type, void *val, size_t size)
+{
+    assert(stack && stack->attr);
+    Status rc = OK;
+    rc = stack->depdf.insert_first_data(stack->attr, type, val, size);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"Push_link:insert_first_data failed. rc=%d.",rc);
+    }
+    return rc;
+}
+/*
+功能描述:
+    从链栈中弹出首个数据。
+参数说明:
+    stack--已存在的链栈属性空间。
+    type--存储节点数据类型。
+    val--存储数据存储区首地址。
+    size--存储数据空间大小。
+返回值:
+    无
+注意事项:
+    type,size用于检测val指向的存储空间是否可以存储实际数据。
+    val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
+    见test_link.c文件的funcs.del_first_data函数调用。
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static void Pop_Link(STACK_T stack,v_type_t type, void *val, size_t size)
+{
+    assert(stack && stack->attr);
+    stack->depdf.del_first_data(stack->attr,type,val,size);
+}
+
+/*
+功能描述:
+    输出链栈所有数据。
+参数说明:
+    stack--已存在的链栈属性空间。
+    visit--输出链栈数据值到终端函数指针。
+返回值:
+    OK--成功.
+    !OK--失败。
+注意事项:
+    无
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static Status StackTraverse_Link (STACK_T stack, stack_visit visit)
+{
+    assert(stack && stack->attr);
+    Status rc = OK;
+    rc = stack->depdf.link_traverse(stack->attr, visit);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"StackTraverse:link_traverse failed.rc=%d",rc);
+    }
+    return rc;
+}
+
+/*
+功能描述:
+    检测链栈是否为空。
+参数说明:
+    stack--指向已建立的链栈属性空间。
+返回值:
+    TRUE--空链栈。
+    FALSE--非空链栈。
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static Status StackEmpty_Link(STACK_T stack)
+{
+    assert(stack && stack->attr);
+    return stack->depdf.link_empty(stack->attr);
+}
+
+/*
+功能描述:
+    清楚链栈的所有数据。
+参数说明:
+    stack--已建立的链栈属性空间的指针。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static void ClearStack_Link(STACK_T stack)
+{
+    assert(stack);
+    if(StackEmpty_Link(stack) != TRUE)
+    {
+        stack->depdf.clear_link(stack->attr);
+    }
+}
+
+
 
 void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, stack_visit visit)
 {
     assert(type != UNKNOWN_STACK);
     stk_funcs->destroy_stack = DestroyStack_Link;
     stk_funcs->init_stack = InitStack_Link;
+    stk_funcs->pop = Pop_Link;
+    stk_funcs->push = Push_Link;
+    stk_funcs->stack_traverse = StackTraverse_Link;
+    stk_funcs->clear_stack = ClearStack_Link;
+    stk_funcs->stack_empty = StackEmpty_Link;
 }
 
 void LogoutStackFuncs_Link(Stack_funcs_t * stk_funcs)

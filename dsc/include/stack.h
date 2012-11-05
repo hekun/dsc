@@ -17,12 +17,12 @@ typedef enum stack_type_E
 typedef Status  (*stack_visit) (void *val);
 typedef Status  (*InitStack)(STACK_T *stack, stack_type_t type, stack_visit visit);
 typedef void    (*DestroyStack)(STACK_T *stack);
-typedef Status  (*ClearStack)(STACK_T stack);
+typedef void    (*ClearStack)(STACK_T stack);
 typedef Status  (*StackEmpty)(STACK_T stack);
 typedef void    (*StackLength)(STACK_T stack, Int32_t *elem_total);
 typedef Status  (*GetTop)(STACK_T stack, v_type_t type, void **val, size_t size);
 typedef Status  (*Push) (STACK_T stack, v_type_t type, void *val, size_t size);
-typedef Status  (*Pop) (STACK_T stack, v_type_t type, void **val, size_t size);
+typedef void    (*Pop) (STACK_T stack, v_type_t type, void *val, size_t size);
 typedef Status  (*StackTraverse) (STACK_T stack, stack_visit vist);
 
 typedef struct stack_opt_funcs_S
