@@ -32,6 +32,7 @@ static Status   InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, 
 static void     DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size);
 static Status   LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit);
 static void     GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size);
+static void     GetLinkLength_Dob(LINK_T dob_attr, Int32_t *len);
 
 /*
 功能描述:
@@ -296,6 +297,25 @@ static void GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t 
 
 /*
 功能描述:
+    获取链表元素个数。
+参数说明:
+    dob_attr--链表属性空间首地址。
+    len--链表长度。
+返回值:
+    无
+作者:
+    何昆
+日期:
+    2012-11-07
+*/
+static void GetLinkLength_Dob(LINK_T dob_attr, Int32_t *len)
+{
+    assert(dob_attr);
+    *len = dob_attr->len;
+}
+
+/*
+功能描述:
     对每个结点调用visit()函数。显示整个链表内容。
 参数说明:
     dob_attr--已存在的链表属性结点。
@@ -358,6 +378,7 @@ Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
     funcs->insert_first_data = InsertFirstData_Dob;
     funcs->del_first_data = DelFirstData_Dob;
     funcs->get_first_data = GetFirstData_Dob;
+    funcs->get_link_length = GetLinkLength_Dob;
     funcs->link_empty = LinkEmpty_Dob;
     if(visit == NULL)
     {

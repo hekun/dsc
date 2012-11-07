@@ -25,6 +25,7 @@ static void link_test(link_type_t type)
     Status rc = OK;
     Int32_t i = 0;
     Int32_t *p_val = NULL;
+    Int32_t length = 0;
     link_funcs_t funcs;
     link_opt_funcs_t optf;
     optf.visit = visitnode_link;
@@ -55,6 +56,8 @@ static void link_test(link_type_t type)
     
     funcs.get_first_data(link1,V_INT, (void **)&p_val, sizeof(*p_val));
     printf("The first data:%d.\n", *p_val);
+    funcs.get_link_length(link1, &length);
+    printf("Link list length = %d.\n", length);
     funcs.destroy_link(&link1);
     LogoutLinkFuncs(&funcs);
 }

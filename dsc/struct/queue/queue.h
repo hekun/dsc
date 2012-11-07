@@ -27,5 +27,5 @@ typedef Status  (*EnQueue)  (QUEUE_T q, v_type_t type, void *val, size_t size);
 typedef Status  (*DeQueue)  (QUEUE_T q, v_type_t type, void *val, size_t size);
 typedef Status  (*QueueTraverse) (QUEUE_T q, queue_visit visit);
 
-
+#undef QUEUE_T
 #endif
