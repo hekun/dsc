@@ -15,7 +15,9 @@ typedef struct depand_funcs_S
     ClearLink       clear_link;
     LinkEmpty       link_empty;
     GetFirstData    get_first_data;
+    GetLinkLength   get_link_length;
     LinkTraverse    link_traverse;
+    
 }depand_funcs_t;
 
 struct STACK_T
@@ -32,7 +34,7 @@ static void Pop_Link(STACK_T stack, v_type_t type, void * val, size_t size);
 static Status GetTop_Link(STACK_T stack, v_type_t type, void **val, size_t size);
 static void ClearStack_Link(STACK_T stack);
 static Status StackEmpty_Link(STACK_T stack);
-
+static void StackLength_Link(STACK_T stack, Int32_t *Length);
 /*
 功能描述:
     注册栈操作函数需要调用的链表操作部分函数。
@@ -77,6 +79,7 @@ static Status RegisterDepdFuncs_Stack(depand_funcs_t *s_depdf,stack_type_t type,
         s_depdf->clear_link = l_func.clear_link;
         s_depdf->link_empty = l_func.link_empty;
         s_depdf->get_first_data = l_func.get_first_data;
+        s_depdf->get_link_length = l_func.get_link_length;
         s_depdf->link_traverse = l_func.link_traverse;
     }
     return rc;
@@ -303,8 +306,24 @@ static void ClearStack_Link(STACK_T stack)
         stack->depdf.clear_link(stack->attr);
     }
 }
-
-
+/*
+功能描述:
+    获取链栈元素总数。
+参数说明:
+    stack--链栈属性空间首地址。
+    Length--存储链栈元素总数。
+返回值:
+    无
+作者:
+    何昆
+日期:
+    2012-11-07
+*/
+static void StackLength_Link(STACK_T stack, Int32_t *Length)
+{
+    assert(stack);
+    stack->depdf.get_link_length(stack->attr, Length);
+}
 
 void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, stack_visit visit)
 {
@@ -316,6 +335,7 @@ void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, stack
     stk_funcs->stack_traverse = StackTraverse_Link;
     stk_funcs->clear_stack = ClearStack_Link;
     stk_funcs->stack_empty = StackEmpty_Link;
+    stk_funcs->stack_length = StackLength_Link;
     stk_funcs->get_top = GetTop_Link;
 }
 
