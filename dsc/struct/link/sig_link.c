@@ -32,6 +32,7 @@ static Status   InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, 
 static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
 static void     DelFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static void     GetFirstData_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
+static Status   AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size);
 static void     GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len);
 /*
 功能描述:
@@ -354,7 +355,44 @@ static void GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len)
     *len = sig_attr->len;
 }
 
-
+/*
+功能描述:
+    将数据追加到链表结尾。
+参数说明:
+    sig_attr--链表属性空间。
+    type--存储节点数据类型。
+    val--存储数据的存储区首地址。
+    size--存储数据空间大小。    
+返回值:
+    
+作者:
+    He kun
+日期:
+    2012-11-12
+*/
+static Status AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size)
+{
+    assert(sig_attr && val);
+    Status rc = OK;
+    sig_node_t *node = NULL;
+    rc = MakeNode_Sig(&node, type, val, size);
+    if(rc != OK)
+    {
+        err_ret(LOG_NO_FILE_LINE,"AppendData_Sig: MakeNode_Sig failed.rc=%d.",rc);
+        return rc;
+    }
+    if(LinkEmpty_Sig(sig_attr))
+    {
+        sig_attr->head = sig_attr->tail = node;
+    }
+    else
+    {
+        sig_attr->tail->next = node;
+        sig_attr->tail = node;
+    }
+    sig_attr->len++;
+    return rc;
+}
 
 Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
 {
@@ -368,6 +406,7 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     funcs->del_first_data = DelFirstData_Sig;
     funcs->get_first_data = GetFirstData_Sig;
     funcs->get_link_length = GetLinkLength_Sig;
+    funcs->append_data  = AppendData_Sig;
     funcs->link_empty = LinkEmpty_Sig;
     if(visit == NULL)
     {

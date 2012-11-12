@@ -58,6 +58,11 @@ static void link_test(link_type_t type)
     printf("The first data:%d.\n", *p_val);
     funcs.get_link_length(link1, &length);
     printf("Link list length = %d.\n", length);
+    i=100;
+    funcs.append_data(link1, V_INT, (void *)&i, sizeof(i));
+    printf("After append, link1 list:");
+    funcs.link_traverse(link1, visitnode_link);
+    
     funcs.destroy_link(&link1);
     LogoutLinkFuncs(&funcs);
 }

@@ -27,7 +27,7 @@ typedef Status  (*LinkTraverse) (LINK_T link, opt_visit visit);
 typedef void    (*DelFirstData) (LINK_T link,v_type_t type, void *val, size_t size);
 typedef void    (*GetFirstData) (LINK_T link,v_type_t type, void **val, size_t size);
 typedef void    (*GetLinkLength)(LINK_T link, Int32_t *len);
-
+typedef Status  (*AppendData)   (LINK_T sig_attr, v_type_t type, void *val, size_t size);
 typedef struct link_opt_funcs_S
 {
     opt_visit            visit;		//显示结点信息函数
@@ -45,6 +45,7 @@ typedef struct link_funcs_S
     DelFirstData        del_first_data;
     GetFirstData        get_first_data;
     GetLinkLength       get_link_length;
+    AppendData          append_data;
     link_opt_funcs_t    opt_func;//可选函数，该函数是否设置，会影响其他函数是否有效。
 }link_funcs_t;
 

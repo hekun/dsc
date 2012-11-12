@@ -31,6 +31,8 @@ static Status   LinkTraverse_Cic(LINK_T cic_attr, opt_visit visit);
 static void     DelFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
 static void     GetFirstData_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size);
 static void     GetLinkLength_Cic(LINK_T cic_attr, Int32_t *len);
+static Status   AppendData_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t size);
+
 /*
 功能描述:
     创建链表节点
@@ -319,6 +321,48 @@ static void GetLinkLength_Cic(LINK_T cic_attr, Int32_t *len)
 
 /*
 功能描述:
+    将数据追加到链表结尾。
+参数说明:
+    cic_attr--链表属性空间。
+    type--存储节点数据类型。
+    val--存储数据的存储区首地址。
+    size--存储数据空间大小。    
+返回值:
+    
+作者:
+    He kun
+日期:
+    2012-11-12
+*/
+static Status AppendData_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t size)
+{
+    assert(cic_attr && val);
+    Status rc = OK;
+    cic_node_t *node = NULL;
+    rc = MakeNode_Cic(&node, type, val, size);
+    if(rc != OK)
+    {
+        err_ret(LOG_NO_FILE_LINE,"AppendData_Cic: MakeNode_Cic failed.rc=%d.",rc);
+        return rc;
+    }
+    if(LinkEmpty_Cic(cic_attr))
+    {
+        cic_attr->head = cic_attr->tail = node;
+    }
+    else
+    {
+        cic_attr->tail->next = node;
+        node->next = cic_attr->head;
+        cic_attr->tail = node;
+    }
+    cic_attr->len++;
+    return rc;
+}
+
+
+
+/*
+功能描述:
     对每个结点调用visit()函数。显示整个链表内容。
 参数说明:
     cic_attr--已存在的链表属性结点。
@@ -376,6 +420,7 @@ Status RegisterLinkFuncs_Cic(link_funcs_t *funcs,opt_visit visit)
     funcs->insert_first_data = InsertFirstData_Cic;
     funcs->del_first_data = DelFirstData_Cic;
     funcs->get_link_length = GetLinkLength_Cic;
+    funcs->append_data = AppendData_Cic;
     funcs->link_empty = LinkEmpty_Cic;
     if(visit == NULL)
     {

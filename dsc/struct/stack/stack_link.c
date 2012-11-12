@@ -18,14 +18,14 @@ typedef struct depand_funcs_S
     GetLinkLength   get_link_length;
     LinkTraverse    link_traverse;
     
-}depand_funcs_t;
+}stack_depdf_t;
 
 struct STACK_T
 {
     link_attr_t attr;
-    depand_funcs_t depdf;
+    stack_depdf_t depdf;
 };
-static Status RegisterDepdFuncs_Stack(depand_funcs_t * s_depdf, stack_type_t type, opt_visit visit);
+static Status RegisterDepdFuncs_Stack(stack_depdf_t * s_depdf, stack_type_t type, opt_visit visit);
 static Status InitStack_Link(STACK_T * stack, stack_type_t type, opt_visit visit);
 static void DestroyStack_Link(STACK_T * stack);
 static Status Push_Link(STACK_T stack, v_type_t type, void * val, size_t size);
@@ -50,7 +50,7 @@ static void StackLength_Link(STACK_T stack, Int32_t *Length);
 开发日期:
     2012-11-04
 */
-static Status RegisterDepdFuncs_Stack(depand_funcs_t *s_depdf,stack_type_t type, opt_visit visit)
+static Status RegisterDepdFuncs_Stack(stack_depdf_t *s_depdf,stack_type_t type, opt_visit visit)
 {
     Status rc = OK;
     link_funcs_t l_func;

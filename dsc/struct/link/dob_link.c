@@ -33,7 +33,7 @@ static void     DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_
 static Status   LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit);
 static void     GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size);
 static void     GetLinkLength_Dob(LINK_T dob_attr, Int32_t *len);
-
+static Status   AppendData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
 /*
 功能描述:
     创建链表节点
@@ -367,7 +367,32 @@ static Status LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit)
     return OK;
 }
 
+static Status AppendData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size)
+{
+    assert(dob_attr && val);
+    Status rc = OK;
+    dob_node_t *node = NULL;
+    rc = MakeNode_Dob(&node, type, val, size);
+    if(rc != OK)
+    {
+        err_ret(LOG_NO_FILE_LINE,"AppendData_Dob: MakeNode_Dob failed.rc=%d.",rc);
+        return rc;
+    }
+    if(LinkEmpty_Dob(dob_attr))
+    {
+        dob_attr->head = dob_attr->tail = node;
+    }
+    else
+    {
+        dob_attr->tail->next = node;
+        node->prior = dob_attr->tail;
+        dob_attr->tail = node;
+    }
+    dob_attr->len++;
+    return rc;
 
+
+}
 Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
 {
     assert(funcs);
@@ -379,6 +404,7 @@ Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
     funcs->del_first_data = DelFirstData_Dob;
     funcs->get_first_data = GetFirstData_Dob;
     funcs->get_link_length = GetLinkLength_Dob;
+    funcs->append_data = AppendData_Dob;
     funcs->link_empty = LinkEmpty_Dob;
     if(visit == NULL)
     {
