@@ -32,6 +32,9 @@ static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
 static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t size);
 static Status QueueEmpty_Link(QUEUE_T Q);
 static void ClearQueue_Link(QUEUE_T Q);
+static void QueueLength_Link(QUEUE_T Q, Int32_t *Length);
+static Status QueueTraverse_Link (QUEUE_T Q, queue_visit visit);
+
 
 /*
 功能描述:
@@ -277,7 +280,7 @@ static void ClearQueue_Link(QUEUE_T Q)
 功能描述:
     获取链队列元素总数。
 参数说明:
-    stack--链队列属性空间首地址。
+    Q--链队列属性空间首地址。
     Length--存储链队列元素总数。
 返回值:
     无
@@ -297,7 +300,7 @@ static void QueueLength_Link(QUEUE_T Q, Int32_t *Length)
 功能描述:
     输出链队列所有数据。
 参数说明:
-    stack--已存在的链队列属性空间。
+    Q--已存在的链队列属性空间。
     visit--输出链队列数据值到终端函数指针。
 返回值:
     OK--成功.
@@ -322,7 +325,62 @@ static Status QueueTraverse_Link (QUEUE_T Q, queue_visit visit)
 }
 
 
+/*
+功能描述:
+    注册链队列接口函数
+参数说明:
+    q_funcs--已存在的接口函数存储空间首地址。
+    visit--对链队列每个元素进行操作的函数指针。
+返回值:
+    OK--成功.
+    !OK--失败。
+注意事项:
+    无
+作者:
+    He kun
+日期:
+    2012-11-14
+*/
 
+
+void RegisterQueueFuncs_Link(queue_funcs_t * q_funcs, queue_type_t type, queue_visit visit)
+{
+    assert(type != UNKNOWN_QUEUE && q_funcs);
+    q_funcs->destroy_queue = DestroyQueue_Link;
+    q_funcs->init_queue = InitQueue_Link;
+    q_funcs->clear_queue = ClearQueue_Link;
+    q_funcs->queue_empty = QueueEmpty_Link;
+    q_funcs->queue_length = QueueLength_Link;
+    q_funcs->get_head = GetQueueHead_Link;
+    q_funcs->en_queue = EnQueue_Link;
+    q_funcs->de_queue = DeQueue_Link;
+    if(visit == NULL)
+    {
+        q_funcs->opt_func.visit = NULL;
+#ifdef _DEBUG
+        log_msg(LOG_NO_FILE_LINE, "opt_visit未定义，QueueTraverse函数无法使用。");
+#endif
+        q_funcs->queue_traverse = NULL;
+    }
+    else
+    {
+        q_funcs->opt_func.visit = visit;
+        q_funcs->queue_traverse = QueueTraverse_Link;
+    }
+}
+
+
+void LogoutQueueFuncs_Link(queue_funcs_t * q_funcs)
+{
+    if(q_funcs == NULL)
+    {
+        log_msg(LOG_NO_FILE_LINE,"The Queue funcs is NULL.");
+    }
+    else
+    {
+        bzero(q_funcs, sizeof(*q_funcs));
+    }
+}
 
 
 

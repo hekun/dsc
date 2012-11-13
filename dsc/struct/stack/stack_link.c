@@ -332,11 +332,23 @@ void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, stack
     stk_funcs->init_stack = InitStack_Link;
     stk_funcs->pop = Pop_Link;
     stk_funcs->push = Push_Link;
-    stk_funcs->stack_traverse = StackTraverse_Link;
     stk_funcs->clear_stack = ClearStack_Link;
     stk_funcs->stack_empty = StackEmpty_Link;
     stk_funcs->stack_length = StackLength_Link;
     stk_funcs->get_top = GetTop_Link;
+    if(visit == NULL)
+    {
+        stk_funcs->opt_func.visit = NULL;
+#ifdef _DEBUG
+        log_msg(LOG_NO_FILE_LINE, "opt_visit未定义，StackTraverse函数无法使用。");
+#endif
+		stk_funcs->stack_traverse = NULL;
+    }
+    else
+    {
+        stk_funcs->opt_func.visit = visit;
+        stk_funcs->stack_traverse = StackTraverse_Link;
+    }
 }
 
 void LogoutStackFuncs_Link(Stack_funcs_t * stk_funcs)
