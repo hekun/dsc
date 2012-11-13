@@ -28,8 +28,10 @@ static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, 
 static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, opt_visit visit);
 static void DestroyQueue_Link(QUEUE_T *Q);
 static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
+static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
 static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t size);
-
+static Status QueueEmpty_Link(QUEUE_T Q);
+static void ClearQueue_Link(QUEUE_T Q);
 
 /*
 ¹¦ÄÜÃèÊö:
@@ -309,9 +311,9 @@ static void QueueLength_Link(QUEUE_T Q, Int32_t *Length)
 */
 static Status QueueTraverse_Link (QUEUE_T Q, queue_visit visit)
 {
-    assert(stack && stack->attr);
+    assert(Q && Q->attr);
     Status rc = OK;
-    rc = stack->depdf.link_traverse(stack->attr, visit);
+    rc = Q->depdf.link_traverse(Q->attr, visit);
     if(rc != OK)
     {
         err_ret(LOG_FILE_LINE,"StackTraverse:link_traverse failed.rc=%d",rc);
