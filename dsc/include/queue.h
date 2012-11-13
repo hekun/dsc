@@ -17,15 +17,15 @@ typedef enum queue_type_E
 
 
 typedef Status  (*queue_visit) (void *val);
-typedef Status  (*InitQueue) (QUEUE_T * q);//构造一个空链队列
-typedef Status  (*DestroyQueue) (QUEUE_T *q);//销毁已建立的链队列
-typedef Status  (*ClearQueue) (QUEUE_T q);//将链队列中元素全部清空
-typedef Status  (*QueueEmpty) (QUEUE_T q);//判断链队列是否为空。
-typedef Int32_t (*QueueLength)(QUEUE_T q);//获取链队列元素总数
-typedef Status  (*GetQueueHead)  (QUEUE_T q, v_type_t type, void **val, size_t size);//获取链队列头元素数值
-typedef Status  (*EnQueue)  (QUEUE_T q, v_type_t type, void *val, size_t size);//在链队列中追加尾元素
-typedef void    (*DeQueue)  (QUEUE_T q, v_type_t type, void *val, size_t size);//删除链队列头元素
-typedef Status  (*QueueTraverse) (QUEUE_T q, queue_visit visit);//对链队列的每个元素执行visit函数。
+typedef Status  (*InitQueue) (QUEUE_T * Q);//构造一个空链队列
+typedef Status  (*DestroyQueue) (QUEUE_T *Q);//销毁已建立的链队列
+typedef Status  (*ClearQueue) (QUEUE_T Q);//将链队列中元素全部清空
+typedef Status  (*QueueEmpty) (QUEUE_T Q);//判断链队列是否为空。
+typedef Int32_t (*QueueLength)(QUEUE_T Q);//获取链队列元素总数
+typedef Status  (*GetQueueHead)  (QUEUE_T Q, v_type_t type, void **val, size_t size);//获取链队列头元素数值
+typedef Status  (*EnQueue)  (QUEUE_T Q, v_type_t type, void *val, size_t size);//在链队列中追加尾元素
+typedef void    (*DeQueue)  (QUEUE_T Q, v_type_t type, void *val, size_t size);//删除链队列头元素
+typedef Status  (*QueueTraverse) (QUEUE_T Q, queue_visit visit);//对链队列的每个元素执行visit函数。
 
 typedef struct queue_opt_funcs_S
 {

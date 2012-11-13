@@ -288,7 +288,7 @@ static Status StackEmpty_Link(STACK_T stack)
 
 /*
 功能描述:
-    清楚链栈的所有数据。
+    清除链栈的所有数据。
 参数说明:
     stack--已建立的链栈属性空间的指针。
 返回值:

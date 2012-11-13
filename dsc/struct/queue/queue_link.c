@@ -36,7 +36,7 @@ static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t siz
     注册链队列操作函数需要调用的链表操作部分函数。
 参数说明:
     depdf--栈操作函数依赖的链表操作函数空间首地址。
-    type--指定链栈组织类型。
+    type--指定链队列组织类型。
     visit--显示栈值函数。
 返回值:
     OK--注册成功。
@@ -99,7 +99,7 @@ static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, 
 开发日期:
     2012-11-04
 */
-static Status InitStack_Link(QUEUE_T *Q, queue_type_t type, opt_visit visit)
+static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, opt_visit visit)
 {
     assert(!*Q);
     Status rc = OK;
@@ -113,7 +113,7 @@ static Status InitStack_Link(QUEUE_T *Q, queue_type_t type, opt_visit visit)
     rc = RegisterDepdFuncs_Queue(&tmp_q->depdf, type, visit);
     if(rc != OK)
     {
-        Free((void * *) Q);
+		Free((void * *) Q);
         err_ret(LOG_FILE_LINE,"InitStack_Link:RegisterDepdFuncs_Stack failed.rc=%d",rc);
         return rc;
     }
@@ -231,4 +231,96 @@ static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t siz
     Q->depdf.get_first_data(Q->attr, type, val, size);
     return OK;
 }
+/*
+功能描述:
+    检测链队列是否为空。
+参数说明:
+    Q--指向已建立的链队列属性空间。
+返回值:
+    TRUE--空链队列。
+    FALSE--非空链队列。
+作者:
+    He kun
+日期:
+    2012-11-13
+*/
+static Status QueueEmpty_Link(QUEUE_T Q)
+{
+    assert(Q && Q->attr);
+    return Q->depdf.link_empty(Q->attr);
+}
+
+/*
+功能描述:
+    清除链队列的所有数据。
+参数说明:
+    Q--已建立的链队列属性空间的指针。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static void ClearQueue_Link(QUEUE_T Q)
+{
+    assert(Q);
+    if(QueueEmpty_Link(Q) != TRUE)
+    {
+        Q->depdf.clear_link(Q->attr);
+    }
+}
+
+/*
+功能描述:
+    获取链队列元素总数。
+参数说明:
+    stack--链队列属性空间首地址。
+    Length--存储链队列元素总数。
+返回值:
+    无
+作者:
+    何昆
+日期:
+    2012-11-07
+*/
+
+static void QueueLength_Link(QUEUE_T Q, Int32_t *Length)
+{
+    assert(Q);
+    Q->depdf.get_link_length(Q->attr, Length);
+}
+
+/*
+功能描述:
+    输出链队列所有数据。
+参数说明:
+    stack--已存在的链队列属性空间。
+    visit--输出链队列数据值到终端函数指针。
+返回值:
+    OK--成功.
+    !OK--失败。
+注意事项:
+    无
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
+static Status QueueTraverse_Link (QUEUE_T Q, queue_visit visit)
+{
+    assert(stack && stack->attr);
+    Status rc = OK;
+    rc = stack->depdf.link_traverse(stack->attr, visit);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"StackTraverse:link_traverse failed.rc=%d",rc);
+    }
+    return rc;
+}
+
+
+
+
+
 
