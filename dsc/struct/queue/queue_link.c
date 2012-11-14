@@ -5,7 +5,7 @@
 #include "link.h"
 #include "queue.h"
 
-#define QUEUE_T queue_attr_t;
+#define QUEUE_T queue_attr_t
 typedef struct queue_depdf_S
 {
     InitLink        init_link;
@@ -16,16 +16,18 @@ typedef struct queue_depdf_S
     LinkEmpty       link_empty;
     GetFirstData    get_first_data;
     GetLinkLength   get_link_length;
+    DelFirstData    del_first_data;
     LinkTraverse    link_traverse;
-}queue_depdf_t;
+} queue_depdf_t;
 
 struct QUEUE_T
 {
     link_attr_t attr;
     queue_depdf_t depdf;
 };
+
 static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, opt_visit visit);
-static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, opt_visit visit);
+static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, queue_visit visit);
 static void DestroyQueue_Link(QUEUE_T *Q);
 static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
 static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
@@ -75,13 +77,13 @@ static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, 
     {
         s_depdf->init_link = l_func.init_link;
         s_depdf->destroy_link = l_func.destroy_link;
-        s_depdf->insert_first_data = l_func.insert_first_data;
         s_depdf->append_data = l_func.append_data;
         s_depdf->clear_link = l_func.clear_link;
         s_depdf->link_empty = l_func.link_empty;
         s_depdf->get_first_data = l_func.get_first_data;
         s_depdf->get_link_length = l_func.get_link_length;
         s_depdf->link_traverse = l_func.link_traverse;
+        s_depdf->del_first_data = l_func.del_first_data;
     }
     return rc;
 }
@@ -104,7 +106,7 @@ static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, 
 开发日期:
     2012-11-04
 */
-static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, opt_visit visit)
+static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, queue_visit visit)
 {
     assert(!*Q);
     Status rc = OK;
@@ -114,7 +116,7 @@ static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, opt_visit visit)
 		err_ret(LOG_FILE_LINE,"InitStack_Link:Malloc failed.");
 		return rc;
 	}
-    STACK_T tmp_q = *Q;
+    QUEUE_T tmp_q = *Q;
     rc = RegisterDepdFuncs_Queue(&tmp_q->depdf, type, visit);
     if(rc != OK)
     {
@@ -228,7 +230,7 @@ static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
 static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t size)
 {
     assert(Q && Q->attr);
-    if(StackEmpty_Link(Q))
+    if(QueueEmpty_Link(Q))
     {
         err_ret(LOG_NO_FILE_LINE,"empty Queue.");
         return ERR_EMPTY_LIST;

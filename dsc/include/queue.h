@@ -17,7 +17,7 @@ typedef enum queue_type_E
 
 
 typedef Status  (*queue_visit) (void *val);
-typedef Status  (*InitQueue) (QUEUE_T *Q, queue_type_t type, opt_visit visit);//构造一个空链队列
+typedef Status  (*InitQueue) (QUEUE_T *Q, queue_type_t type, queue_visit visit);//构造一个空链队列
 typedef void    (*DestroyQueue) (QUEUE_T *Q);//销毁已建立的链队列
 typedef void    (*ClearQueue) (QUEUE_T Q);//将链队列中元素全部清空
 typedef Status  (*QueueEmpty) (QUEUE_T Q);//判断链队列是否为空。
@@ -45,6 +45,10 @@ typedef struct queue_funcs_S
     QueueTraverse  queue_traverse;
     queue_opt_funcs_t opt_func;//可选函数，该函数是否设置，会影响其他函数是否有效。
 }queue_funcs_t;
+
+void RegisterQueueFuncs(queue_funcs_t * q_funcs, queue_type_t type, queue_visit visit);
+void LogoutqueueFuncs(queue_funcs_t * funcs, queue_type_t type);
+
 
 #undef QUEUE_T
 #endif

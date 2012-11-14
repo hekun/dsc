@@ -17,7 +17,6 @@ typedef struct depand_funcs_S
     GetFirstData    get_first_data;
     GetLinkLength   get_link_length;
     LinkTraverse    link_traverse;
-    
 }stack_depdf_t;
 
 struct STACK_T
