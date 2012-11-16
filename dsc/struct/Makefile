@@ -1,4 +1,4 @@
-DIRS=link stack
+DIRS=link stack queue
 all:
 	@for i in $(DIRS); do \
 		echo Making all in $${i}; \
