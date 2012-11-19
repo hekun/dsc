@@ -12,10 +12,10 @@ Int32_t main(void)
 {
     log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK QUEUE TEST--------");
     queue_test(QUEUE_SIGNAL_LINK_LIST);
-    //log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK QUEUE TEST--------");
-    //queue_test(QUEUE_SIGNAL_LINK_LIST);
-    //log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK QUEUE TEST--------");
-    //queue_test(QUEUE_CIRCLE_LINK_LIST);    
+    log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK QUEUE TEST--------");
+    queue_test(QUEUE_SIGNAL_LINK_LIST);
+    log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK QUEUE TEST--------");
+    queue_test(QUEUE_CIRCLE_LINK_LIST);    
     return OK;
 }
 
