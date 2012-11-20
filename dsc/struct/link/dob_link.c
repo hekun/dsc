@@ -112,7 +112,7 @@ static Status InitLink_Dob(LINK_T * link)
         return OK;
     }
     /*
-    1.创建存储循环链表属性的空间，并初始化。
+    1.创建存储链表属性的空间，并初始化。
     */
     rc = Malloc((void * *)link,sizeof(**link));
     if(rc != OK)

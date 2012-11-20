@@ -111,7 +111,7 @@ static Status InitLink_Cic(LINK_T * link)
         return OK;
     }
     /*
-    1.创建存储循环链表属性的空间，并初始化。
+    1.创建存储链表属性的空间，并初始化。
     */
     rc = Malloc((void * *)link,sizeof(**link));
     if(rc != OK)
@@ -223,7 +223,7 @@ static Status InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, si
     {
         cic_attr->head = node;
         cic_attr->tail = node;
-        node->next = node;	/*循环链表尾结点指针指向头结点。*/
+        node->next = node;	/*链表尾结点指针指向头结点。*/
     }
     /*
     2.如果属性空间非空，则更新属性空间头结点和结点个数。
@@ -232,7 +232,7 @@ static Status InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, si
     {
         node->next = cic_attr->head;
         cic_attr->head = node;
-        cic_attr->tail->next = node;/*循环链表尾结点指针指向头结点。*/
+        cic_attr->tail->next = node;/*链表尾结点指针指向头结点。*/
     }
     cic_attr->len++;
     return rc;
