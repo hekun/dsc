@@ -26,12 +26,15 @@ static Status   InitLink_Sig(LINK_T *link);
 static void     ClearList_Sig(LINK_T sig_attr);
 static Status   LinkEmpty_Sig(LINK_T sig_attr);
 static void     DestroyLink_Sig(LINK_T *link);
-static Status   MakeNode_Sig(sig_node_t * * p, v_type_t type, void * val, size_t size);
+static Status   MakeNode_Val_Sig(sig_node_t * * p, v_type_t type, void * val, size_t size);
+static Status   MakeNode_Vdata_Sig(sig_node_t **p, v_data_t *vdata);
 static void     FreeNode_Sig(sig_node_t * *p);
-static Status   InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
+static Status   InsertFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
+static Status   InsertFirstVdata_Sig(LINK_T sig_attr, v_data_t *vdata);
+
 static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
-static void     DelFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
-static void     GetFirstData_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
+static void     DelFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
+static void     GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
 static Status   AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size);
 static void     GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len);
 /*
@@ -49,9 +52,9 @@ static void     GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len);
     OK--成功.
     !OK--失败.
 注意事项:
-    空节点设置: MakeNode_Sig(&node,V_UNKNOWN_TYPE, NULL, 0);
+    空节点设置: MakeNode_Val_Sig(&node,V_UNKNOWN_TYPE, NULL, 0);
 */
-static Status MakeNode_Sig(sig_node_t **p, v_type_t type, void * val, size_t size)
+static Status MakeNode_Val_Sig(sig_node_t **p, v_type_t type, void * val, size_t size)
 {
     assert(!*p);
     Status rc = OK;
@@ -72,6 +75,39 @@ static Status MakeNode_Sig(sig_node_t **p, v_type_t type, void * val, size_t siz
     *p = node;
     return rc;
 }
+
+/*
+功能描述:
+    为已建立的抽象数据类型创建新节点。
+参数说明:
+    p--存储新建成功的链表节点。
+    vdata--抽象数据类型。
+返回值:
+    OK--创建成功!
+    !OK--创建失败!
+作者:
+    He kun
+日期:
+    2012-11-29
+*/
+
+static Status MakeNode_Vdata_Sig(sig_node_t **p, v_data_t *vdata)
+{
+    assert(!*p && vdata);
+    Status rc = OK;
+    sig_node_t * node = NULL;
+    rc = Malloc((void * *) &node, sizeof(sig_node_t));
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
+        return rc;
+    }
+    node->data = vdata;
+    *p = node;
+    return rc;
+
+}
+
 
 /*
 功能描述:
@@ -200,19 +236,23 @@ static void DestroyLink_Sig(LINK_T *link)
 返回值:
     OK--插入头结点成功。
     !OK--插入头结点失败。
+作者:
+    He kun
+日期:
+    2012-11-29
 */
 
-static Status InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size)
+static Status InsertFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size)
 {
     assert(sig_attr);
 
     Status rc = OK;
     sig_node_t* node = NULL;
 
-    rc = MakeNode_Sig(&node, type, val, size);
+    rc = MakeNode_Val_Sig(&node, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_FILE_LINE,"MakeNode_Sig failed.rc=%d",rc);
+        err_ret(LOG_FILE_LINE,"MakeNode_Val_Sig failed.rc=%d",rc);
         return rc;
     }
     /*
@@ -234,6 +274,54 @@ static Status InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, si
     sig_attr->len++;
     return rc;
 }
+
+/*
+功能描述:
+    将抽象数据类型插入到链表中。
+参数说明:
+    sig_attr--链表属性空间地址。
+    vdata--抽象数据类型空间首地址。
+返回值:
+    OK--插入头结点成功。
+    !OK--插入头结点失败。
+作者:
+    He kun
+日期:
+    2012-11-29
+*/
+static Status InsertFirstVdata_Sig(LINK_T sig_attr, v_data_t *vdata)
+{
+    assert(sig_attr);
+
+    Status rc = OK;
+    sig_node_t* node = NULL;
+    rc = MakeNode_Vdata_Sig(&node,vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"MakeNode_Vdata_Sig failed.rc=%d",rc);
+        return rc;
+    }    
+    /*
+    1.如果属性空间为空，则更新属性空间的所有成员。
+    */
+    if(LinkEmpty_Sig(sig_attr))
+    {
+        sig_attr->head = node;
+        sig_attr->tail = node;
+    }
+    /*
+    2.如果属性空间非空，则更新属性空间头结点和结点个数。
+    */
+    else
+    {
+        node->next = sig_attr->head;
+        sig_attr->head = node;
+    }
+    sig_attr->len++;
+    return rc;
+}
+
+
 /*
 功能描述:
     获取链表中的头节点数据。
@@ -249,7 +337,7 @@ static Status InsertFirstData_Sig(LINK_T sig_attr, v_type_t type, void * val, si
 日期:
     2012-11-05
 */
-static void GetFirstData_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size)
+static void GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size)
 {
     assert(sig_attr && !LinkEmpty_Sig(sig_attr));
     if(sig_attr->head->data->type == type && 
@@ -318,7 +406,7 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
 完成日期:
     2012-11-02
 */
-static void DelFirstData_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t size)
+static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t size)
 {
     assert(!LinkEmpty_Sig(sig_attr) && val
         && type == sig_attr->head->data->type
@@ -336,6 +424,43 @@ static void DelFirstData_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t si
     FreeNode_Sig(&node);
     sig_attr->len--;
 }
+
+/*
+功能描述:
+    从链表中断开头节点，获取头节点中的抽象数据。
+参数说明:
+    sig_attr--链表属性空间。
+    vdata--初始值为NULL;
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-11-29
+*/
+static void DelFirstVdata_Sig(LINK_T sig_attr,v_data_t **vdata)
+{
+    assert(!LinkEmpty_Sig(sig_attr) && vdata);
+    Status rc = OK;
+    sig_node_t *node = sig_attr->head;
+    rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);
+    if(rc != OK)
+    {
+        return ;
+    }
+    if(sig_attr->len == 1)
+    {
+        sig_attr->head = sig_attr->tail = NULL;
+    }
+    else
+    {
+        sig_attr->head = sig_attr->head->next;
+    }
+    FreeNode_Sig(&node);
+    sig_attr->len--;    
+}
+
+
 /*
 功能描述:
     获取链表元素个数。
@@ -375,10 +500,10 @@ static Status AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t s
     assert(sig_attr && val);
     Status rc = OK;
     sig_node_t *node = NULL;
-    rc = MakeNode_Sig(&node, type, val, size);
+    rc = MakeNode_Val_Sig(&node, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_NO_FILE_LINE,"AppendData_Sig: MakeNode_Sig failed.rc=%d.",rc);
+        err_ret(LOG_NO_FILE_LINE,"AppendData_Sig: MakeNode_Val_Sig failed.rc=%d.",rc);
         return rc;
     }
     if(LinkEmpty_Sig(sig_attr))
@@ -402,9 +527,9 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     funcs->destroy_link = DestroyLink_Sig;
     funcs->clear_link = ClearList_Sig;
     
-    funcs->insert_first_data = InsertFirstData_Sig;
-    funcs->del_first_data = DelFirstData_Sig;
-    funcs->get_first_data = GetFirstData_Sig;
+    funcs->insert_first_data = InsertFirstVal_Sig;
+    funcs->del_first_data = DelFirstVal_Sig;
+    funcs->get_first_data = GetFirstVal_Sig;
     funcs->get_link_length = GetLinkLength_Sig;
     funcs->append_data  = AppendData_Sig;
     funcs->link_empty = LinkEmpty_Sig;
