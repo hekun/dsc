@@ -35,7 +35,10 @@ static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
 static void     DelFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static Status   DelFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
 static void     GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
-static Status   AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size);
+static void GetFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
+static Status   AppendVal_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size);
+
+
 static void     GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len);
 /*
 功能描述:
@@ -348,8 +351,24 @@ static void GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t s
         *val = sig_attr->head->data->val;
     }
 }
-static 
-
+/*
+功能描述:
+    获取链表有节点存储的抽象数据类型的首地址。
+参数说明:
+    sig_attr--链表属性空间首地址。
+    vdata--存储的抽象数据类型的首地址。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static void GetFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata)
+{
+    assert(sig_attr && !LinkEmpty_Sig(sig_attr));
+    *vdata = sig_attr->head->data;
+}
 
 /*
 功能描述:
@@ -538,7 +557,7 @@ static void GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len)
 日期:
     2012-11-12
 */
-static Status AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size)
+static Status AppendVal_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size)
 {
     assert(sig_attr && val);
     Status rc = OK;
@@ -546,7 +565,7 @@ static Status AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t s
     rc = MakeNode_Val_Sig(&node, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_NO_FILE_LINE,"AppendData_Sig: MakeNode_Val_Sig failed.rc=%d.",rc);
+        err_ret(LOG_NO_FILE_LINE,"AppendVal_Sig: MakeNode_Val_Sig failed.rc=%d.",rc);
         return rc;
     }
     if(LinkEmpty_Sig(sig_attr))
@@ -562,6 +581,46 @@ static Status AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t s
     return rc;
 }
 
+/*
+功能描述:
+    将vdata指向的抽象数据类型的结构体追加到链表结尾。
+参数说明:
+    sig_attr--链表属性空间。
+    vdata--要追加的抽象数据类型。
+返回值:
+    OK--成功
+    !OK--失败。 
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static Status AppendVdata_Sig(LINK_T sig_attr, v_data_t *vdata)
+{
+    assert(sig_attr && vdata);
+    Status rc = OK;
+    sig_node_t *node = NULL;
+    rc = MakeNode_Vdata_Sig(&node, vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_NO_FILE_LINE,"AppendVal_Sig: MakeNode_Val_Sig failed.rc=%d.",rc);
+        return rc;
+    }
+    if(LinkEmpty_Sig(sig_attr))
+    {
+        sig_attr->head = sig_attr->tail = node;
+    }
+    else
+    {
+        sig_attr->tail->next = node;
+        sig_attr->tail = node;
+    }
+    sig_attr->len++;
+    return rc;
+}
+
+
+
 Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
 {
     assert(funcs);
@@ -574,7 +633,7 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     funcs->del_first_data = DelFirstVal_Sig;
     funcs->get_first_data = GetFirstVal_Sig;
     funcs->get_link_length = GetLinkLength_Sig;
-    funcs->append_data  = AppendData_Sig;
+    funcs->append_data  = AppendVal_Sig;
     funcs->link_empty = LinkEmpty_Sig;
     if(visit == NULL)
     {
