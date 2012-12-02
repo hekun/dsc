@@ -31,9 +31,9 @@ static Status   MakeNode_Vdata_Sig(sig_node_t **p, v_data_t *vdata);
 static void     FreeNode_Sig(sig_node_t * *p);
 static Status   InsertFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static Status   InsertFirstVdata_Sig(LINK_T sig_attr, v_data_t *vdata);
-
 static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
 static void     DelFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
+static Status   DelFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
 static void     GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
 static Status   AppendData_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size);
 static void     GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len);
@@ -288,6 +288,8 @@ static Status InsertFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, siz
     He kun
 日期:
     2012-11-29
+注意事项:
+    vdata指向已存储了实际数据的存储空间
 */
 static Status InsertFirstVdata_Sig(LINK_T sig_attr, v_data_t *vdata)
 {
@@ -346,6 +348,9 @@ static void GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t s
         *val = sig_attr->head->data->val;
     }
 }
+static 
+
+
 /*
 功能描述:
     对每个结点调用visit()函数。显示整个链表内容。
@@ -423,6 +428,44 @@ static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t siz
     }
     FreeNode_Sig(&node);
     sig_attr->len--;
+}
+
+/*
+功能描述:
+    删除链表头节点，将节点数值存储到新建的vdata指向的存储空间中。
+参数说明:
+    sig_attr--链表属性空间。
+    vdata--指向函数新建的存储抽象数据空间，该空间存储头节点实际数据。
+返回值:
+    OK--成功:
+    !OK--失败。
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static Status DelFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata)
+{
+    assert(!LinkEmpty_Sig(sig_attr) && !*vdata);
+    Status rc = OK;
+    sig_node_t * node = sig_attr->head;
+    rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"DelFirstVdata_Sig failed.rc=%d.",rc);
+        return rc;
+    }
+    if(sig_attr->len == 1)
+    {
+        sig_attr->head = sig_attr->tail = NULL;
+    }
+    else
+    {
+        sig_attr->head = sig_attr->head->next;
+    }
+    FreeNode_Sig(&node);
+    sig_attr->len--;
+    return OK;
 }
 
 /*
