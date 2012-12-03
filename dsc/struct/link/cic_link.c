@@ -24,14 +24,21 @@ static Status   InitLink_Cic(LINK_T *link);
 static void     ClearList_Cic(LINK_T cic_attr);
 static Status   LinkEmpty_Cic(LINK_T cic_attr);
 static void     DestroyLink_Cic(LINK_T *link);
-static Status   MakeNode_Cic(cic_node_t * * p, v_type_t type, void * val, size_t size);
+static Status   MakeNode_Val_Cic(cic_node_t * * p, v_type_t type, void * val, size_t size);
+static Status   MakeNode_Vdata_Cic(cic_node_t **p, v_data_t *vdata);
+
 static void     FreeNode_Cic(cic_node_t * *p);
-static Status   InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
+static Status   InsertFirstVal_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
+static Status   InsertFirstVdata_Cic(LINK_T cic_attr, v_data_t *vdata);
+
+
 static Status   LinkTraverse_Cic(LINK_T cic_attr, opt_visit visit);
-static void     DelFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
-static void     GetFirstData_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size);
+static void     DelFirstVal_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
+static Status   DelFirstVdata_Cic(LINK_T cic_attr, v_data_t **vdata);
+static void     GetFirstVal_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size);
+static void     GetFirstVdata_Cic(LINK_T cic_attr, v_data_t **vdata);
 static void     GetLinkLength_Cic(LINK_T cic_attr, Int32_t *len);
-static Status   AppendData_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t size);
+static Status   AppendVal_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t size);
 
 /*
 功能描述:
@@ -48,9 +55,9 @@ static Status   AppendData_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t
     OK--成功.
     !OK--失败.
 注意事项:
-    空节点设置: MakeNode_Cic(&node,V_UNKNOWN_TYPE, NULL, 0);
+    空节点设置: MakeNode_Val_Cic(&node,V_UNKNOWN_TYPE, NULL, 0);
 */
-static Status MakeNode_Cic(cic_node_t **p, v_type_t type, void * val, size_t size)
+static Status MakeNode_Val_Cic(cic_node_t **p, v_type_t type, void * val, size_t size)
 {
     assert(!*p);
     Status rc = OK;
@@ -71,6 +78,39 @@ static Status MakeNode_Cic(cic_node_t **p, v_type_t type, void * val, size_t siz
     *p = node;
     return rc;
 }
+
+/*
+功能描述:
+    为已建立的抽象数据类型创建新节点。
+参数说明:
+    p--存储新建成功的链表节点。
+    vdata--抽象数据类型。
+返回值:
+    OK--创建成功!
+    !OK--创建失败!
+作者:
+    He kun
+日期:
+    2012-11-29
+*/
+static Status MakeNode_Vdata_Cic(cic_node_t **p, v_data_t *vdata)
+{
+    assert(!*p && vdata);
+    Status rc = OK;
+    cic_node_t * node = NULL;
+    rc = Malloc((void * *) &node, sizeof(cic_node_t));
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
+        return rc;
+    }
+    node->data = vdata;
+    *p = node;
+    return rc;
+
+}
+
+
 /*
 功能描述:
     释放节点数据
@@ -203,17 +243,17 @@ static void DestroyLink_Cic(LINK_T *link)
     !OK--插入头结点失败。
 */
 
-static Status InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size)
+static Status InsertFirstVal_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size)
 {
     assert(cic_attr);
 
     Status rc = OK;
     cic_node_t* node = NULL;
 
-    rc = MakeNode_Cic(&node, type, val, size);
+    rc = MakeNode_Val_Cic(&node, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_FILE_LINE,"MakeNode_Cic failed.rc=%d",rc);
+        err_ret(LOG_FILE_LINE,"MakeNode_Val_Cic failed.rc=%d",rc);
         return rc;
     }
     /*
@@ -240,6 +280,59 @@ static Status InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, si
 
 /*
 功能描述:
+    将抽象数据类型插入到链表中。
+参数说明:
+    cic_attr--链表属性空间地址。
+    vdata--抽象数据类型空间首地址。
+返回值:
+    OK--插入头结点成功。
+    !OK--插入头结点失败。
+作者:
+    He kun
+日期:
+    2012-11-29
+注意事项:
+    vdata指向已存储了实际数据的存储空间
+*/
+static Status InsertFirstVdata_Cic(LINK_T cic_attr, v_data_t *vdata)
+{
+    assert(cic_attr);
+
+    Status rc = OK;
+    cic_node_t* node = NULL;
+    rc = MakeNode_Vdata_Cic(&node,vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"MakeNode_Vdata_Cic failed.rc=%d",rc);
+        return rc;
+    }    
+    /*
+    1.如果属性空间为空，则更新属性空间的所有成员。
+    */
+    if(LinkEmpty_Cic(cic_attr))
+    {
+        cic_attr->head = node;
+        cic_attr->tail = node;
+        node->next = node;	/*链表尾结点指针指向头结点。*/
+    }
+    /*
+    2.如果属性空间非空，则更新属性空间头结点和结点个数。
+    */
+    else
+    {
+        node->next = cic_attr->head;
+        cic_attr->head = node;
+        cic_attr->tail->next = node;/*链表尾结点指针指向头结点。*/
+    }
+    cic_attr->len++;
+    return rc;
+}
+
+
+
+
+/*
+功能描述:
     从链表中断开头节点，获取头节点中的数据指针。
 参数说明:
     cic_attr--链表属性空间。
@@ -251,13 +344,13 @@ static Status InsertFirstData_Cic(LINK_T cic_attr, v_type_t type, void * val, si
 注意事项:
     type,size用于检测val指向的存储空间是否可以存储节点实际数据。
     val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
-    见test_link.c文件的funcs.del_first_data函数调用。
+    见test_link.c文件的funcs.del_first_val函数调用。
 作者:
     He kun
 完成日期:
     2012-11-02
 */
-static void DelFirstData_Cic(LINK_T cic_attr,v_type_t type, void *val, size_t size)
+static void DelFirstVal_Cic(LINK_T cic_attr,v_type_t type, void *val, size_t size)
 {
     assert(!LinkEmpty_Cic(cic_attr) && val
         && type == cic_attr->head->data->type
@@ -276,6 +369,47 @@ static void DelFirstData_Cic(LINK_T cic_attr,v_type_t type, void *val, size_t si
     FreeNode_Cic(&node);
     cic_attr->len--;
 }
+
+/*
+功能描述:
+    删除链表头节点，将节点数值存储到新建的vdata指向的存储空间中。
+参数说明:
+    cic_attr--链表属性空间。
+    vdata--指向函数新建的存储抽象数据空间，该空间存储头节点实际数据。
+返回值:
+    OK--成功:
+    !OK--失败。
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static Status DelFirstVdata_Cic(LINK_T cic_attr, v_data_t **vdata)
+{
+    assert(!LinkEmpty_Cic(cic_attr) && !*vdata);
+    Status rc = OK;
+    cic_node_t * node = cic_attr->head;
+    rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"DelFirstVdata_Cic failed.rc=%d.",rc);
+        return rc;
+    }
+    if(cic_attr->len == 1)
+    {
+        cic_attr->head = cic_attr->tail = NULL;
+    }
+    else
+    {
+        cic_attr->head = cic_attr->head->next;
+        cic_attr->tail->next = cic_attr->head;
+    }
+    FreeNode_Cic(&node);
+    cic_attr->len--;
+    return OK;
+}
+
+
 /*
 功能描述:
     获取链表中的头节点数据。
@@ -291,7 +425,7 @@ static void DelFirstData_Cic(LINK_T cic_attr,v_type_t type, void *val, size_t si
 日期:
     2012-11-05
 */
-static void GetFirstData_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size)
+static void GetFirstVal_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size)
 {
     assert(cic_attr && !LinkEmpty_Cic(cic_attr));
     if(cic_attr->head->data->type == type && 
@@ -300,6 +434,27 @@ static void GetFirstData_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t 
         *val = cic_attr->head->data->val;
     }
 }
+
+/*
+功能描述:
+    获取链表有节点存储的抽象数据类型的首地址。
+参数说明:
+    cic_attr--链表属性空间首地址。
+    vdata--存储的抽象数据类型的首地址。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static void GetFirstVdata_Cic(LINK_T cic_attr, v_data_t **vdata)
+{
+    assert(cic_attr && !LinkEmpty_Cic(cic_attr));
+    *vdata = cic_attr->head->data;
+}
+
+
 /*
 功能描述:
     获取链表元素个数。
@@ -334,15 +489,15 @@ static void GetLinkLength_Cic(LINK_T cic_attr, Int32_t *len)
 日期:
     2012-11-12
 */
-static Status AppendData_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t size)
+static Status AppendVal_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t size)
 {
     assert(cic_attr && val);
     Status rc = OK;
     cic_node_t *node = NULL;
-    rc = MakeNode_Cic(&node, type, val, size);
+    rc = MakeNode_Val_Cic(&node, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_NO_FILE_LINE,"AppendData_Cic: MakeNode_Cic failed.rc=%d.",rc);
+        err_ret(LOG_NO_FILE_LINE,"AppendVal_Cic: MakeNode_Val_Cic failed.rc=%d.",rc);
         return rc;
     }
     if(LinkEmpty_Cic(cic_attr))
@@ -356,6 +511,47 @@ static Status AppendData_Cic(LINK_T cic_attr, v_type_t type, void *val, size_t s
         cic_attr->tail = node;
     }
     cic_attr->len++;
+    return rc;
+}
+
+/*
+功能描述:
+    将vdata指向的抽象数据类型的结构体追加到链表结尾。
+参数说明:
+    cic_attr--链表属性空间。
+    vdata--要追加的抽象数据类型。
+返回值:
+    OK--成功
+    !OK--失败。 
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static Status AppendVdata_Cic(LINK_T cic_attr, v_data_t *vdata)
+{
+    assert(cic_attr && vdata);
+    Status rc = OK;
+    cic_node_t *node = NULL;
+    rc = MakeNode_Vdata_Cic(&node, vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_NO_FILE_LINE,"AppendVal_Cic: MakeNode_Vdata_Cic failed.rc=%d.",rc);
+        return rc;
+    }
+    if(LinkEmpty_Cic(cic_attr))
+    {
+        cic_attr->head = cic_attr->tail = node;
+    }
+    else
+    {
+        cic_attr->tail->next = node;
+        node->next = cic_attr->head;
+        cic_attr->tail = node;
+    }
+    cic_attr->len++;
+    return rc;
+
     return rc;
 }
 
@@ -416,11 +612,15 @@ Status RegisterLinkFuncs_Cic(link_funcs_t *funcs,opt_visit visit)
     funcs->init_link = InitLink_Cic;
     funcs->destroy_link = DestroyLink_Cic;
     funcs->clear_link = ClearList_Cic;
-    funcs->get_first_data = GetFirstData_Cic;
-    funcs->insert_first_data = InsertFirstData_Cic;
-    funcs->del_first_data = DelFirstData_Cic;
+    funcs->get_first_val = GetFirstVal_Cic;
+    funcs->get_first_vdata = GetFirstVdata_Cic;
+    funcs->insert_first_val = InsertFirstVal_Cic;
+    funcs->insert_first_vdata = InsertFirstVdata_Cic;
+    funcs->del_first_val = DelFirstVal_Cic;
+    funcs->del_first_vdata = DelFirstVdata_Cic;
     funcs->get_link_length = GetLinkLength_Cic;
-    funcs->append_data = AppendData_Cic;
+    funcs->append_val = AppendVal_Cic;
+    funcs->append_vdata = AppendVdata_Cic;
     funcs->link_empty = LinkEmpty_Cic;
     if(visit == NULL)
     {

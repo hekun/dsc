@@ -21,8 +21,11 @@ typedef void    (*ClearStack)(STACK_T stack);
 typedef Status  (*StackEmpty)(STACK_T stack);
 typedef void    (*StackLength)(STACK_T stack, Int32_t *elem_total);
 typedef Status  (*GetTop)(STACK_T stack, v_type_t type, void **val, size_t size);
+typedef Status  (*GetTopVdata) (STACK_T stack, v_data_t **vdata);
 typedef Status  (*Push) (STACK_T stack, v_type_t type, void *val, size_t size);
+typedef Status  (*PushVdata) (STACK_T stack, v_data_t *vdata);
 typedef void    (*Pop) (STACK_T stack, v_type_t type, void *val, size_t size);
+typedef Status  (*PopVdata) (STACK_T stack, v_data_t **vdata);
 typedef Status  (*StackTraverse) (STACK_T stack, stack_visit vist);
 
 typedef struct stack_opt_funcs_S
@@ -39,8 +42,11 @@ typedef struct Stack_funcs_S
     StackEmpty          stack_empty;
     StackLength         stack_length;
     GetTop              get_top;
+    GetTopVdata         get_top_vdata;
     Push                push;
+    PushVdata           push_vdata;
     Pop                 pop;
+    PopVdata            pop_vdata;
     StackTraverse       stack_traverse;
     stack_opt_funcs_t   opt_func;//可选函数，该函数是否设置，会影响其他函数是否有效。
 }Stack_funcs_t;

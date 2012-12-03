@@ -10,13 +10,13 @@ typedef struct queue_depdf_S
 {
     InitLink        init_link;
     DestroyLink     destroy_link;
-    InsertFirstData insert_first_data;
-    AppendData      append_data;
+    InsertFirstVal insert_first_val;
+    AppendVal      append_val;
     ClearLink       clear_link;
     LinkEmpty       link_empty;
-    GetFirstData    get_first_data;
+    GetFirstVal    get_first_val;
     GetLinkLength   get_link_length;
-    DelFirstData    del_first_data;
+    DelFirstVal    del_first_val;
     LinkTraverse    link_traverse;
 } queue_depdf_t;
 
@@ -77,13 +77,13 @@ static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, 
     {
         s_depdf->init_link = l_func.init_link;
         s_depdf->destroy_link = l_func.destroy_link;
-        s_depdf->append_data = l_func.append_data;
+        s_depdf->append_val = l_func.append_val;
         s_depdf->clear_link = l_func.clear_link;
         s_depdf->link_empty = l_func.link_empty;
-        s_depdf->get_first_data = l_func.get_first_data;
+        s_depdf->get_first_val = l_func.get_first_val;
         s_depdf->get_link_length = l_func.get_link_length;
         s_depdf->link_traverse = l_func.link_traverse;
-        s_depdf->del_first_data = l_func.del_first_data;
+        s_depdf->del_first_val = l_func.del_first_val;
     }
     return rc;
 }
@@ -180,10 +180,10 @@ static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
 {
     assert(Q && data);
     Status rc = OK;
-    rc = Q->depdf.append_data(Q->attr, type, data, size);
+    rc = Q->depdf.append_val(Q->attr, type, data, size);
     if(rc != OK)
     {
-        err_ret(LOG_FILE_LINE,"EnQueue_Link: append_data failed,rc=%d.",rc);
+        err_ret(LOG_FILE_LINE,"EnQueue_Link: append_val failed,rc=%d.",rc);
     }
     return rc;
 }
@@ -211,7 +211,7 @@ static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
 {
     assert(Q && data);
 
-    Q->depdf.del_first_data(Q->attr,type,data,size);
+    Q->depdf.del_first_val(Q->attr,type,data,size);
 }
 
 /*
@@ -235,7 +235,7 @@ static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t siz
         err_ret(LOG_NO_FILE_LINE,"empty Queue.");
         return ERR_EMPTY_LIST;
     }
-    Q->depdf.get_first_data(Q->attr, type, val, size);
+    Q->depdf.get_first_val(Q->attr, type, val, size);
     return OK;
 }
 /*

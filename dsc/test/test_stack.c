@@ -13,7 +13,7 @@ Int32_t main(void)
     log_msg(LOG_NO_FILE_LINE, "--------SIGNAL LINK STACK TEST--------");
     stack_test(STACK_SIGNAL_LINK_LIST);
     log_msg(LOG_NO_FILE_LINE, "--------DOUBLE LINK STACK TEST--------");
-    stack_test(STACK_SIGNAL_LINK_LIST);
+    stack_test(STACK_DOUBLE_LINK_LIST);
     log_msg(LOG_NO_FILE_LINE, "--------CIRCLE LINK STACK TEST--------");
     stack_test(STACK_CIRCLE_LINK_LIST);    
     return OK;
@@ -51,6 +51,30 @@ static void stack_test(stack_type_t type)
         printf("The top data:");
         stk_funcs.get_top(stk, V_INT,(void **)&p_val, sizeof(*p_val));
         printf("%d.\n", *p_val);
+
+        v_data_t *vdata = NULL;
+
+        stk_funcs.pop_vdata(stk, &vdata);
+        printf("Stack pop Vdata:");
+        visitnode_stack(vdata->val);
+        printf("\n");
+        destroy_vdata(&vdata);
+
+        printf("After pop vdata, stack:");
+        stk_funcs.stack_traverse(stk, visitnode_stack);
+
+        stk_funcs.get_top_vdata(stk, &vdata);
+        printf("The top data:");
+        visitnode_stack(vdata->val);
+        printf("\n");
+        
+        vdata = NULL;
+        i = 100;
+        init_vdata(&vdata, V_INT, &i, sizeof(i));
+        stk_funcs.push_vdata(stk, vdata);
+        printf("After push vdata, stack:");
+        stk_funcs.stack_traverse(stk, visitnode_stack);
+        
     }
     stk_funcs.clear_stack(stk);
     if(!stk_funcs.stack_empty(stk))

@@ -26,14 +26,20 @@ static Status   InitLink_Dob(LINK_T *link);
 static void     ClearList_Dob(LINK_T dob_attr);
 static Status   LinkEmpty_Dob(LINK_T dob_attr);
 static void     DestroyLink_Dob(LINK_T *link);
-static Status   MakeNode_Dob(dob_node_t * * p, v_type_t type, void * val, size_t size);
+static Status   MakeNode_Val_Dob(dob_node_t * * p, v_type_t type, void * val, size_t size);
+static Status   MakeNode_Vdata_Dob(dob_node_t **p, v_data_t *vdata);
 static void     FreeNode_Dob(dob_node_t * *p);
-static Status   InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
-static void     DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size);
+static Status   InsertFirstVal_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
+static Status   InsertFirstVdata_Dob(LINK_T dob_attr, v_data_t *vdata);
+static void     DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size);
+static Status   DelFirstVdata_Dob(LINK_T dob_attr, v_data_t **vdata);
 static Status   LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit);
-static void     GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size);
+static void     GetFirstVal_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size);
+static void     GetFirstVdata_Dob(LINK_T dob_attr, v_data_t **vdata);
 static void     GetLinkLength_Dob(LINK_T dob_attr, Int32_t *len);
-static Status   AppendData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
+static Status   AppendVal_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
+static Status   AppendVdata_Dob(LINK_T dob_attr, v_data_t *vdata);
+
 /*
 功能描述:
     创建链表节点
@@ -49,9 +55,9 @@ static Status   AppendData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_
     OK--成功.
     !OK--失败.
 注意事项:
-    空节点设置: MakeNode_Dob(&node,V_UNKNOWN_TYPE, NULL, 0);
+    空节点设置: MakeNode_Val_Dob(&node,V_UNKNOWN_TYPE, NULL, 0);
 */
-static Status MakeNode_Dob(dob_node_t **p, v_type_t type, void * val, size_t size)
+static Status MakeNode_Val_Dob(dob_node_t **p, v_type_t type, void * val, size_t size)
 {
     assert(!*p);
     Status rc = OK;
@@ -72,6 +78,39 @@ static Status MakeNode_Dob(dob_node_t **p, v_type_t type, void * val, size_t siz
     *p = node;
     return rc;
 }
+
+/*
+功能描述:
+    为已建立的抽象数据类型创建新节点。
+参数说明:
+    p--存储新建成功的链表节点。
+    vdata--抽象数据类型。
+返回值:
+    OK--创建成功!
+    !OK--创建失败!
+作者:
+    He kun
+日期:
+    2012-11-29
+*/
+static Status MakeNode_Vdata_Dob(dob_node_t **p, v_data_t *vdata)
+{
+    assert(!*p && vdata);
+    Status rc = OK;
+    dob_node_t * node = NULL;
+    rc = Malloc((void * *) &node, sizeof(dob_node_t));
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
+        return rc;
+    }
+    node->data = vdata;
+    *p = node;
+    return rc;
+
+}
+
+
 /*
 功能描述:
     释放节点数据
@@ -197,17 +236,17 @@ static void DestroyLink_Dob(LINK_T *link)
     !OK--插入头结点失败。
 */
 
-static Status InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size)
+static Status InsertFirstVal_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size)
 {
     assert(dob_attr);
 
     Status rc = OK;
     dob_node_t* node = NULL;
 
-    rc = MakeNode_Dob(&node, type, val, size);
+    rc = MakeNode_Val_Dob(&node, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_FILE_LINE,"MakeNode_Dob failed.rc=%d",rc);
+        err_ret(LOG_FILE_LINE,"MakeNode_Val_Dob failed.rc=%d",rc);
         return rc;
     }
     /*
@@ -233,6 +272,57 @@ static Status InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, si
 
 /*
 功能描述:
+    将抽象数据类型插入到链表中。
+参数说明:
+    dob_attr--链表属性空间地址。
+    vdata--抽象数据类型空间首地址。
+返回值:
+    OK--插入头结点成功。
+    !OK--插入头结点失败。
+作者:
+    He kun
+日期:
+    2012-11-29
+注意事项:
+    vdata指向已存储了实际数据的存储空间
+*/
+static Status InsertFirstVdata_Dob(LINK_T dob_attr, v_data_t *vdata)
+{
+    assert(dob_attr);
+
+    Status rc = OK;
+    dob_node_t* node = NULL;
+    rc = MakeNode_Vdata_Dob(&node,vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"MakeNode_Vdata_Dob failed.rc=%d",rc);
+        return rc;
+    }    
+    /*
+    1.如果属性空间为空，则更新属性空间的所有成员。
+    */
+    if(LinkEmpty_Dob(dob_attr))
+    {
+        dob_attr->head = node;
+        dob_attr->tail = node;
+    }
+    /*
+    2.如果属性空间非空，则更新属性空间头结点和结点个数。
+    */
+    else
+    {
+        dob_attr->head->prior = node;//原链表头节点的前驱指针执行新头节点。
+        node->next = dob_attr->head;
+        dob_attr->head = node;
+    }
+    dob_attr->len++;
+    return rc;
+}
+
+
+
+/*
+功能描述:
     从链表中断开头节点，获取头节点中的数据指针。
 参数说明:
     dob_attr--链表属性空间。
@@ -244,13 +334,13 @@ static Status InsertFirstData_Dob(LINK_T dob_attr, v_type_t type, void * val, si
 注意事项:
     type,size用于检测val指向的存储空间是否可以存储节点实际数据。
     val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
-    见test_link.c文件的funcs.del_first_data函数调用。
+    见test_link.c文件的funcs.del_first_val函数调用。
 作者:
     He kun
 完成日期:
     2012-11-02
 */
-static void DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size)
+static void DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size)
 {
     assert(!LinkEmpty_Dob(dob_attr) && val
         && type == dob_attr->head->data->type
@@ -272,6 +362,47 @@ static void DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t si
 
 /*
 功能描述:
+    删除链表头节点，将节点数值存储到新建的vdata指向的存储空间中。
+参数说明:
+    dob_attr--链表属性空间。
+    vdata--指向函数新建的存储抽象数据空间，该空间存储头节点实际数据。
+返回值:
+    OK--成功:
+    !OK--失败。
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static Status DelFirstVdata_Dob(LINK_T dob_attr, v_data_t **vdata)
+{
+    assert(!LinkEmpty_Dob(dob_attr) && !*vdata);
+    Status rc = OK;
+    dob_node_t * node = dob_attr->head;
+    rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"DelFirstVdata_Dob failed.rc=%d.",rc);
+        return rc;
+    }
+    if(dob_attr->len == 1)
+    {
+        dob_attr->head = dob_attr->tail = NULL;
+    }
+    else
+    {
+        dob_attr->head = dob_attr->head->next;
+        dob_attr->head->prior = NULL;
+    }
+    FreeNode_Dob(&node);
+    dob_attr->len--;
+    return OK;
+}
+
+
+
+/*
+功能描述:
     获取链表中的头节点数据。
 参数说明:
     dob_attr--链表属性空间首地址。
@@ -285,7 +416,7 @@ static void DelFirstData_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t si
 日期:
     2012-11-05
 */
-static void GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size)
+static void GetFirstVal_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size)
 {
     assert(dob_attr && !LinkEmpty_Dob(dob_attr));
     if(dob_attr->head->data->type == type && 
@@ -294,6 +425,26 @@ static void GetFirstData_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t 
         *val = dob_attr->head->data->val;
     }
 }
+
+/*
+功能描述:
+    获取链表有节点存储的抽象数据类型的首地址。
+参数说明:
+    dob_attr--链表属性空间首地址。
+    vdata--存储的抽象数据类型的首地址。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static void GetFirstVdata_Dob(LINK_T dob_attr, v_data_t **vdata)
+{
+    assert(dob_attr && !LinkEmpty_Dob(dob_attr));
+    *vdata = dob_attr->head->data;
+}
+
 
 /*
 功能描述:
@@ -367,15 +518,15 @@ static Status LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit)
     return OK;
 }
 
-static Status AppendData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size)
+static Status AppendVal_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size)
 {
     assert(dob_attr && val);
     Status rc = OK;
     dob_node_t *node = NULL;
-    rc = MakeNode_Dob(&node, type, val, size);
+    rc = MakeNode_Val_Dob(&node, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_NO_FILE_LINE,"AppendData_Dob: MakeNode_Dob failed.rc=%d.",rc);
+        err_ret(LOG_NO_FILE_LINE,"AppendVal_Dob: MakeNode_Val_Dob failed.rc=%d.",rc);
         return rc;
     }
     if(LinkEmpty_Dob(dob_attr))
@@ -390,9 +541,49 @@ static Status AppendData_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t 
     }
     dob_attr->len++;
     return rc;
-
-
 }
+
+/*
+功能描述:
+    将vdata指向的抽象数据类型的结构体追加到链表结尾。
+参数说明:
+    dob_attr--链表属性空间。
+    vdata--要追加的抽象数据类型。
+返回值:
+    OK--成功
+    !OK--失败。 
+作者:
+    He kun
+日期:
+    2012-12-02
+*/
+static Status AppendVdata_Dob(LINK_T dob_attr, v_data_t *vdata)
+{
+    assert(dob_attr && vdata);
+    Status rc = OK;
+    dob_node_t *node = NULL;
+    rc = MakeNode_Vdata_Dob(&node, vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_NO_FILE_LINE,"AppendVal_Dob: MakeNode_Val_Dob failed.rc=%d.",rc);
+        return rc;
+    }
+    if(LinkEmpty_Dob(dob_attr))
+    {
+        dob_attr->head = dob_attr->tail = node;
+    }
+    else
+    {
+        dob_attr->tail->next = node;
+        node->prior = dob_attr->tail;
+        dob_attr->tail = node;
+    }
+    dob_attr->len++;
+    return rc;
+}
+
+
+
 Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
 {
     assert(funcs);
@@ -400,11 +591,15 @@ Status RegisterLinkFuncs_Dob(link_funcs_t *funcs,opt_visit visit)
     funcs->init_link = InitLink_Dob;
     funcs->destroy_link = DestroyLink_Dob;
     funcs->clear_link = ClearList_Dob;
-    funcs->insert_first_data = InsertFirstData_Dob;
-    funcs->del_first_data = DelFirstData_Dob;
-    funcs->get_first_data = GetFirstData_Dob;
+    funcs->insert_first_val = InsertFirstVal_Dob;
+    funcs->insert_first_vdata = InsertFirstVdata_Dob;
+    funcs->del_first_val = DelFirstVal_Dob;
+    funcs->del_first_vdata = DelFirstVdata_Dob;
+    funcs->get_first_val = GetFirstVal_Dob;
+    funcs->get_first_vdata = GetFirstVdata_Dob;
     funcs->get_link_length = GetLinkLength_Dob;
-    funcs->append_data = AppendData_Dob;
+    funcs->append_val = AppendVal_Dob;
+    funcs->append_vdata = AppendVdata_Dob;
     funcs->link_empty = LinkEmpty_Dob;
     if(visit == NULL)
     {

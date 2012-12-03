@@ -10,11 +10,14 @@ typedef struct depand_funcs_S
 {
     InitLink        init_link;
     DestroyLink     destroy_link;
-    InsertFirstData insert_first_data;
-    DelFirstData    del_first_data;
+    InsertFirstVal  insert_first_val;
+    InsertFirstVdata insert_first_vdata;
+    DelFirstVal     del_first_val;
+    DelFirstVdata   del_first_vdata;
     ClearLink       clear_link;
     LinkEmpty       link_empty;
-    GetFirstData    get_first_data;
+    GetFirstVal     get_first_val;
+    GetFirstVdata   get_first_vdata;
     GetLinkLength   get_link_length;
     LinkTraverse    link_traverse;
 }stack_depdf_t;
@@ -28,9 +31,12 @@ static Status RegisterDepdFuncs_Stack(stack_depdf_t * s_depdf, stack_type_t type
 static Status InitStack_Link(STACK_T * stack, stack_type_t type, opt_visit visit);
 static void DestroyStack_Link(STACK_T * stack);
 static Status Push_Link(STACK_T stack, v_type_t type, void * val, size_t size);
+static Status Push_Vdata_Link(STACK_T stack, v_data_t *vdata);
 static Status StackTraverse_Link (STACK_T stack, stack_visit visit);
 static void Pop_Link(STACK_T stack, v_type_t type, void * val, size_t size);
+static Status Pop_Vdata_Link(STACK_T stack, v_data_t **vdata);
 static Status GetTop_Link(STACK_T stack, v_type_t type, void **val, size_t size);
+static Status GetTopVdata_Link(STACK_T stack, v_data_t **vdata);
 static void ClearStack_Link(STACK_T stack);
 static Status StackEmpty_Link(STACK_T stack);
 static void StackLength_Link(STACK_T stack, Int32_t *Length);
@@ -73,13 +79,16 @@ static Status RegisterDepdFuncs_Stack(stack_depdf_t *s_depdf,stack_type_t type, 
     {
         s_depdf->init_link = l_func.init_link;
         s_depdf->destroy_link = l_func.destroy_link;
-        s_depdf->insert_first_data = l_func.insert_first_data;
-        s_depdf->del_first_data = l_func.del_first_data;
+        s_depdf->insert_first_val = l_func.insert_first_val;
+        s_depdf->del_first_val = l_func.del_first_val;
         s_depdf->clear_link = l_func.clear_link;
         s_depdf->link_empty = l_func.link_empty;
-        s_depdf->get_first_data = l_func.get_first_data;
+        s_depdf->get_first_val = l_func.get_first_val;
         s_depdf->get_link_length = l_func.get_link_length;
         s_depdf->link_traverse = l_func.link_traverse;
+        s_depdf->insert_first_vdata = l_func.insert_first_vdata;
+        s_depdf->get_first_vdata = l_func.get_first_vdata;
+        s_depdf->del_first_vdata = l_func.del_first_vdata;
     }
     return rc;
 }
@@ -153,6 +162,7 @@ static void DestroyStack_Link(STACK_T *stack)
         Free((void * *) stack);
     }
 }
+
 /*
 功能描述:
     向链栈中压入数据
@@ -176,13 +186,40 @@ static Status Push_Link(STACK_T stack, v_type_t type, void *val, size_t size)
 {
     assert(stack && stack->attr);
     Status rc = OK;
-    rc = stack->depdf.insert_first_data(stack->attr, type, val, size);
+    rc = stack->depdf.insert_first_val(stack->attr, type, val, size);
     if(rc != OK)
     {
-        err_ret(LOG_FILE_LINE,"Push_link:insert_first_data failed. rc=%d.",rc);
+        err_ret(LOG_FILE_LINE,"Push_link:insert_first_val failed. rc=%d.",rc);
     }
     return rc;
 }
+
+/*
+功能描述:
+    将抽象数据压入栈中。
+参数说明:
+    stack--已存在的链栈属性空间。
+    vdata--指向抽象数据的首地址。
+返回值:
+    OK--成功;!OK--失败;
+作者:
+    He kun
+日期:
+    2012-12-03
+*/
+static Status Push_Vdata_Link(STACK_T stack, v_data_t *vdata)
+{
+    assert(stack && stack->attr);
+    Status rc = OK;
+
+    rc = stack->depdf.insert_first_vdata(stack->attr, vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"Push_Vdata_link: insert_first_vdata failed. rc=%d.",rc);
+    }
+    return rc;
+}
+
 /*
 功能描述:
     从链栈中弹出首个数据。
@@ -196,7 +233,7 @@ static Status Push_Link(STACK_T stack, v_type_t type, void *val, size_t size)
 注意事项:
     type,size用于检测val指向的存储空间是否可以存储实际数据。
     val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
-    见test_link.c文件的funcs.del_first_data函数调用。
+    见test_link.c文件的funcs.del_first_val函数调用。
 作者:
     He kun
 日期:
@@ -205,8 +242,31 @@ static Status Push_Link(STACK_T stack, v_type_t type, void *val, size_t size)
 static void Pop_Link(STACK_T stack,v_type_t type, void *val, size_t size)
 {
     assert(stack && stack->attr);
-    stack->depdf.del_first_data(stack->attr,type,val,size);
+    stack->depdf.del_first_val(stack->attr,type,val,size);
 }
+
+/*
+功能描述:
+    从栈中取出抽象数据
+参数说明:
+    stack--已存在的链栈属性空间。
+    vdata--初始值为NULL,成功则返回韩式新建的存储有实际数据的抽象数据首地址。
+返回值:
+    OK--成功
+    !OK--失败
+作者:
+    He kun
+日期:
+    2012-12-03
+*/
+
+static Status Pop_Vdata_Link(STACK_T stack, v_data_t **vdata)
+{
+    assert(stack && stack->attr);
+    
+    return stack->depdf.del_first_vdata(stack->attr, vdata);
+}
+
 /*
 功能描述:
     获取链栈栈顶数据。
@@ -233,11 +293,38 @@ static Status GetTop_Link(STACK_T stack, v_type_t type, void **val, size_t size)
         err_ret(LOG_NO_FILE_LINE,"empty stack.");
         return ERR_EMPTY_LIST;
     }
-    stack->depdf.get_first_data(stack->attr, type, val, size);
+    stack->depdf.get_first_val(stack->attr, type, val, size);
     return OK;
 }
 
+/*
+功能描述:
+    获取链栈栈顶数据。
+参数说明:
+    stack--已存在的链栈属性空间。
+    vdata--存储抽象数据空间首地址。
+返回值:
+    ERR_EMPTY_LIST--空链栈。
+    OK--获取栈顶数据成功。
+注意事项:
+    无。
+作者:
+    He kun
+日期:
+    2012-11-05
+*/
 
+static Status GetTopVdata_Link(STACK_T stack, v_data_t **vdata)
+{
+    assert(stack && stack->attr);
+    if(StackEmpty_Link(stack))
+    {
+        err_ret(LOG_NO_FILE_LINE,"empty stack.");
+        return ERR_EMPTY_LIST;
+    }
+    stack->depdf.get_first_vdata(stack->attr, vdata);
+    return OK;
+}
 /*
 功能描述:
     输出链栈所有数据。
@@ -330,11 +417,15 @@ void RegisterStackFuncs_Link(Stack_funcs_t * stk_funcs, stack_type_t type, stack
     stk_funcs->destroy_stack = DestroyStack_Link;
     stk_funcs->init_stack = InitStack_Link;
     stk_funcs->pop = Pop_Link;
+    stk_funcs->pop_vdata = Pop_Vdata_Link;
     stk_funcs->push = Push_Link;
+    stk_funcs->push_vdata = Push_Vdata_Link;
     stk_funcs->clear_stack = ClearStack_Link;
     stk_funcs->stack_empty = StackEmpty_Link;
     stk_funcs->stack_length = StackLength_Link;
     stk_funcs->get_top = GetTop_Link;
+    stk_funcs->get_top_vdata = GetTopVdata_Link;
+    
     if(visit == NULL)
     {
         stk_funcs->opt_func.visit = NULL;

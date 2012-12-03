@@ -26,6 +26,7 @@ static void link_test(link_type_t type)
     Int32_t i = 0;
     Int32_t *p_val = NULL;
     Int32_t length = 0;
+    v_data_t *data = NULL;
     link_funcs_t funcs;
     link_opt_funcs_t optf;
     optf.visit = visitnode_link;
@@ -39,29 +40,52 @@ static void link_test(link_type_t type)
     }
     for(i=0; i<5; i++)
     {
-        rc = funcs.insert_first_data(link1,V_INT,(void *)&i,sizeof(i));
+        rc = funcs.insert_first_val(link1,V_INT,(void *)&i,sizeof(i));
         if(rc != OK)
         {
             funcs.destroy_link(&link1);
-            err_quit(LOG_FILE_LINE,"funcs.insert_first_data,rc=%d.",rc);
+            err_quit(LOG_FILE_LINE,"funcs.insert_first_val,rc=%d.",rc);
         }
     }
     printf("link1 list:");
     funcs.link_traverse(link1,visitnode_link);
 
-    funcs.del_first_data(link1, V_INT, (void *)&i, sizeof(i));
+    funcs.del_first_val(link1, V_INT, (void *)&i, sizeof(i));
     printf("The del first data=%d.\n",i);
-    printf("After del_firt_data, link1 list:");
+    printf("After del_firt_val, link1 list:");
+    funcs.link_traverse(link1,visitnode_link);
+
+    funcs.del_first_vdata(link1, &data);
+    printf("The del vdata = ");
+    visitnode_link(data->val);
+    printf("\n");
+    destroy_vdata(&data);
+    printf("After del_firt_vdata, link1 list:");
     funcs.link_traverse(link1,visitnode_link);
     
-    funcs.get_first_data(link1,V_INT, (void **)&p_val, sizeof(*p_val));
+    
+    funcs.get_first_val(link1,V_INT, (void **)&p_val, sizeof(*p_val));
     printf("The first data:%d.\n", *p_val);
+
+    funcs.get_first_vdata(link1, &data);
+    printf("The first vdata:");
+    visitnode_link(data->val);
+    printf("\n");
+    data = NULL;
+    
+    
     funcs.get_link_length(link1, &length);
     printf("Link list length = %d.\n", length);
     i=100;
-    funcs.append_data(link1, V_INT, (void *)&i, sizeof(i));
-    printf("After append, link1 list:");
+    funcs.append_val(link1, V_INT, (void *)&i, sizeof(i));
+    printf("After append_val, link1 list:");
     funcs.link_traverse(link1, visitnode_link);
+    i = 1000;
+    init_vdata(&data, V_INT, &i, sizeof(i));
+    funcs.append_vdata(link1, data);
+    data = NULL;
+    printf("After append_vdata, link1 list:");
+    funcs.link_traverse(link1, visitnode_link);  
     
     funcs.destroy_link(&link1);
     LogoutLinkFuncs(&funcs);

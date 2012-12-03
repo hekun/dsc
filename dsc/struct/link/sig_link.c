@@ -35,10 +35,9 @@ static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
 static void     DelFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static Status   DelFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
 static void     GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
-static void GetFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
+static void     GetFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
 static Status   AppendVal_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size);
-
-
+static Status   AppendVdata_Sig(LINK_T sig_attr, v_data_t *vdata);
 static void     GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len);
 /*
 功能描述:
@@ -424,7 +423,7 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
 注意事项:
     type,size用于检测val指向的存储空间是否可以存储节点实际数据。
     val指向的缓冲区不必是malloc分配的。只要能存储数据即可。
-    见test_link.c文件的funcs.del_first_data函数调用。
+    见test_link.c文件的funcs.del_first_val函数调用。
 作者:
     He kun
 完成日期:
@@ -486,42 +485,6 @@ static Status DelFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata)
     sig_attr->len--;
     return OK;
 }
-
-/*
-功能描述:
-    从链表中断开头节点，获取头节点中的抽象数据。
-参数说明:
-    sig_attr--链表属性空间。
-    vdata--初始值为NULL;
-返回值:
-    无
-作者:
-    He kun
-日期:
-    2012-11-29
-*/
-static void DelFirstVdata_Sig(LINK_T sig_attr,v_data_t **vdata)
-{
-    assert(!LinkEmpty_Sig(sig_attr) && vdata);
-    Status rc = OK;
-    sig_node_t *node = sig_attr->head;
-    rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);
-    if(rc != OK)
-    {
-        return ;
-    }
-    if(sig_attr->len == 1)
-    {
-        sig_attr->head = sig_attr->tail = NULL;
-    }
-    else
-    {
-        sig_attr->head = sig_attr->head->next;
-    }
-    FreeNode_Sig(&node);
-    sig_attr->len--;    
-}
-
 
 /*
 功能描述:
@@ -628,12 +591,15 @@ Status RegisterLinkFuncs_Sig(link_funcs_t *funcs,opt_visit visit)
     funcs->init_link = InitLink_Sig;
     funcs->destroy_link = DestroyLink_Sig;
     funcs->clear_link = ClearList_Sig;
-    
-    funcs->insert_first_data = InsertFirstVal_Sig;
-    funcs->del_first_data = DelFirstVal_Sig;
-    funcs->get_first_data = GetFirstVal_Sig;
+    funcs->insert_first_val = InsertFirstVal_Sig;
+    funcs->insert_first_vdata = InsertFirstVdata_Sig;
+    funcs->del_first_val = DelFirstVal_Sig;
+    funcs->del_first_vdata = DelFirstVdata_Sig;
+    funcs->get_first_val = GetFirstVal_Sig;
+    funcs->get_first_vdata = GetFirstVdata_Sig;
     funcs->get_link_length = GetLinkLength_Sig;
-    funcs->append_data  = AppendVal_Sig;
+    funcs->append_val  = AppendVal_Sig;
+    funcs->append_vdata = AppendVdata_Sig;
     funcs->link_empty = LinkEmpty_Sig;
     if(visit == NULL)
     {

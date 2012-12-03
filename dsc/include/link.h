@@ -21,13 +21,17 @@ typedef Status  (*InitLink) (LINK_T * link);
 typedef Status  (*LinkEmpty) (LINK_T link);
 typedef void    (*ClearLink) (LINK_T link);
 typedef void    (*DestroyLink) (LINK_T *link);
-typedef Status  (*InsertFirstData) (LINK_T link, v_type_t type, void * val, size_t size);
+typedef Status  (*InsertFirstVal) (LINK_T link, v_type_t type, void * val, size_t size);
+typedef Status  (*InsertFirstVdata) (LINK_T link, v_data_t *vdata);
 typedef Status  (*opt_visit) (void *val);
 typedef Status  (*LinkTraverse) (LINK_T link, opt_visit visit);
-typedef void    (*DelFirstData) (LINK_T link,v_type_t type, void *val, size_t size);
-typedef void    (*GetFirstData) (LINK_T link,v_type_t type, void **val, size_t size);
-typedef void    (*GetLinkLength)(LINK_T link, Int32_t *len);
-typedef Status  (*AppendData)   (LINK_T sig_attr, v_type_t type, void *val, size_t size);
+typedef void    (*DelFirstVal) (LINK_T link,v_type_t type, void *val, size_t size);
+typedef Status  (*DelFirstVdata) (LINK_T link, v_data_t **vdata);
+typedef void    (*GetFirstVal) (LINK_T link,v_type_t type, void **val, size_t size);
+typedef void    (*GetLinkLength) (LINK_T link, Int32_t *len);
+typedef void    (*GetFirstVdata) (LINK_T link, v_data_t **vdata);
+typedef Status  (*AppendVal)   (LINK_T link, v_type_t type, void *val, size_t size);
+typedef Status  (*AppendVdata) (LINK_T link, v_data_t *vdata);
 typedef struct link_opt_funcs_S
 {
     opt_visit            visit;		//显示结点信息函数
@@ -40,12 +44,16 @@ typedef struct link_funcs_S
     LinkEmpty           link_empty;
     ClearLink           clear_link;
 	DestroyLink         destroy_link;
-	InsertFirstData     insert_first_data;
+	InsertFirstVal      insert_first_val;
+    InsertFirstVdata    insert_first_vdata;
     LinkTraverse        link_traverse;
-    DelFirstData        del_first_data;
-    GetFirstData        get_first_data;
+    DelFirstVal         del_first_val;
+    DelFirstVdata       del_first_vdata;
+    GetFirstVal         get_first_val;
+    GetFirstVdata       get_first_vdata;
     GetLinkLength       get_link_length;
-    AppendData          append_data;
+    AppendVal           append_val;
+    AppendVdata         append_vdata;
     link_opt_funcs_t    opt_func;//可选函数，该函数是否设置，会影响其他函数是否有效。
 }link_funcs_t;
 
