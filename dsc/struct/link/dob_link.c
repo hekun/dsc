@@ -518,6 +518,21 @@ static Status LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit)
     return OK;
 }
 
+/*
+功能描述:
+    将数据追加到链表结尾。
+参数说明:
+    dob_attr--链表属性空间。
+    type--存储节点数据类型。
+    val--存储数据的存储区首地址。
+    size--存储数据空间大小。    
+返回值:
+    
+作者:
+    He kun
+日期:
+    2012-11-12
+*/
 static Status AppendVal_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size)
 {
     assert(dob_attr && val);

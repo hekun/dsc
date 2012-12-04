@@ -352,7 +352,6 @@ static Status StackTraverse_Link (STACK_T stack, stack_visit visit)
     }
     return rc;
 }
-
 /*
 功能描述:
     检测链栈是否为空。
