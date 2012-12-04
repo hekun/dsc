@@ -10,13 +10,17 @@ typedef struct queue_depdf_S
 {
     InitLink        init_link;
     DestroyLink     destroy_link;
-    InsertFirstVal insert_first_val;
-    AppendVal      append_val;
+    InsertFirstVal  insert_first_val;
+    InsertFirstVdata insert_first_vdata;
+    AppendVal       append_val;
+    AppendVdata     append_vdata;
     ClearLink       clear_link;
     LinkEmpty       link_empty;
-    GetFirstVal    get_first_val;
+    GetFirstVal     get_first_val;
+    GetFirstVdata   get_first_vdata;
     GetLinkLength   get_link_length;
-    DelFirstVal    del_first_val;
+    DelFirstVal     del_first_val;
+    DelFirstVdata   del_first_vdata;
     LinkTraverse    link_traverse;
 } queue_depdf_t;
 
@@ -29,9 +33,16 @@ struct QUEUE_T
 static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, opt_visit visit);
 static Status InitQueue_Link(QUEUE_T *Q, queue_type_t type, queue_visit visit);
 static void DestroyQueue_Link(QUEUE_T *Q);
+
 static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
+static Status EnQueue_Vdata_Link(QUEUE_T Q, v_data_t *vdata);
+
 static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
+static Status DeQueue_Vdata_Link(QUEUE_T Q, v_data_t **vdata);
+
 static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t size);
+static Status GetQueueHead_Vdata_Link(QUEUE_T Q, v_data_t **vdata);
+
 static Status QueueEmpty_Link(QUEUE_T Q);
 static void ClearQueue_Link(QUEUE_T Q);
 static void QueueLength_Link(QUEUE_T Q, Int32_t *Length);
@@ -78,12 +89,15 @@ static Status RegisterDepdFuncs_Queue(queue_depdf_t *s_depdf,queue_type_t type, 
         s_depdf->init_link = l_func.init_link;
         s_depdf->destroy_link = l_func.destroy_link;
         s_depdf->append_val = l_func.append_val;
+        s_depdf->append_vdata = l_func.append_vdata;
         s_depdf->clear_link = l_func.clear_link;
         s_depdf->link_empty = l_func.link_empty;
         s_depdf->get_first_val = l_func.get_first_val;
+        s_depdf->get_first_vdata = l_func.get_first_vdata;
         s_depdf->get_link_length = l_func.get_link_length;
         s_depdf->link_traverse = l_func.link_traverse;
         s_depdf->del_first_val = l_func.del_first_val;
+        s_depdf->del_first_vdata = l_func.del_first_vdata;
     }
     return rc;
 }
@@ -175,7 +189,6 @@ static void DestroyQueue_Link(QUEUE_T *Q)
 日期:
     2012-11-13
 */
-
 static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
 {
     assert(Q && data);
@@ -187,6 +200,32 @@ static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
     }
     return rc;
 }
+/*
+功能描述:
+    将抽象数据插入队列中。
+参数说明:
+    Q--已存在的链队列属性空间。
+    vdata--已经存储实际数据的抽象数据类型。
+返回值:
+    OK--成功
+    !OK--失败
+作者:
+    He kun
+日期:
+    2012-12-04
+*/
+static Status EnQueue_Vdata_Link(QUEUE_T Q, v_data_t *vdata)
+{
+    Status rc = OK;
+
+    rc = Q->depdf.append_vdata(Q->attr, vdata);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"EnQueue_Vdata_Link: append_vdata failed,rc=%d.",rc);
+    }
+    return rc;
+}
+
 /*
 功能描述:
     删除队列头元素
@@ -205,7 +244,6 @@ static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
     He kun
 日期:
     2012-11-13
-
 */
 static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
 {
@@ -216,10 +254,43 @@ static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
 
 /*
 功能描述:
+    删除队列头元素
+参数说明:
+    Q--已存在的链队列属性空间。
+    vdata--用于存储删除的头节点的属性空间。
+返回值:
+    OK--成功
+    !OK--失败
+作者:
+    He kun
+日期:
+    2012-12-04
+注意事项:
+    vdata作为输入参数时，为NULL;
+    返回时指向一个抽象数据空间首地址。
+    使用完毕需要手动调用destroy_vdata函数销毁该抽象数据空间。
+*/
+
+static Status DeQueue_Vdata_Link(QUEUE_T Q, v_data_t **vdata)
+{
+    assert(Q && Q->attr);
+    Status rc = OK;
+    rc = Q->depdf.del_first_vdata(Q->attr, vdata);
+    return rc;
+}
+
+
+/*
+功能描述:
     获取链队列头节点数据。
 参数说明:
     Q--已存在的链队列属性空间。
-    type--
+    type--数据的实际类型。
+    val--用于存储实际数据空间首地址。
+        如果实际数据是C语言内建的非指针类型，val存储该数据类型的地址。
+        如果实际数据是一级指针，val存储指针值。
+        如果实际数据是其他类型，则先将数据存入一个结构体中,val存储该结构体地址。
+    val_size--实际数据类型大小。
 返回值:
 
 作者:
@@ -238,6 +309,38 @@ static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t siz
     Q->depdf.get_first_val(Q->attr, type, val, size);
     return OK;
 }
+
+/*
+功能描述:
+    获取队列头节点的抽象数据类型。
+参数说明:
+    Q--已存在的链队列属性空间。
+    vdata--指向获取的抽象数据空间
+返回值:
+    OK--成功
+    !OK--失败
+作者:
+    He kun
+日期:
+    2012-12-04
+注意事项:
+    vdata作为输入参数为NULL.
+    作为输出参数,参数为抽象数据空间首地址。
+    不可用destroy_vdata函数销毁。
+*/
+static Status GetQueueHead_Vdata_Link(QUEUE_T Q, v_data_t **vdata)
+{
+    assert(Q && Q->attr);
+    if(QueueEmpty_Link(Q))
+    {
+        err_ret(LOG_NO_FILE_LINE,"empty Queue.");
+        return ERR_EMPTY_LIST;
+    }
+    Q->depdf.get_first_vdata(Q->attr, vdata);
+    return OK;
+}
+
+
 /*
 功能描述:
     检测链队列是否为空。
@@ -343,8 +446,6 @@ static Status QueueTraverse_Link (QUEUE_T Q, queue_visit visit)
 日期:
     2012-11-14
 */
-
-
 void RegisterQueueFuncs_Link(queue_funcs_t * q_funcs, queue_type_t type, queue_visit visit)
 {
     assert(type != UNKNOWN_QUEUE && q_funcs);
@@ -356,6 +457,9 @@ void RegisterQueueFuncs_Link(queue_funcs_t * q_funcs, queue_type_t type, queue_v
     q_funcs->get_head = GetQueueHead_Link;
     q_funcs->en_queue = EnQueue_Link;
     q_funcs->de_queue = DeQueue_Link;
+    q_funcs->get_queue_head_vdata = GetQueueHead_Vdata_Link;
+    q_funcs->en_queue_vdata = EnQueue_Vdata_Link;
+    q_funcs->de_queue_vdata = DeQueue_Vdata_Link;
     if(visit == NULL)
     {
         q_funcs->opt_func.visit = NULL;

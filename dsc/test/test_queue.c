@@ -43,14 +43,33 @@ static void queue_test(queue_type_t type)
     if(rc == OK)
     {
         Int32_t *p_val = NULL;
+        v_data_t *vdata = NULL;
         q_funcs.queue_traverse(Q, visitnode_queue);
         q_funcs.de_queue(Q, V_INT, &i, sizeof(i));
         printf("Queue delete data: %d.\n", i);
         printf("After delete, queue:");
         q_funcs.queue_traverse(Q, visitnode_queue);
+
         printf("The top data:");
         q_funcs.get_head(Q, V_INT, (void **)&p_val, sizeof(*p_val));
         printf("%d.\n",*p_val);
+
+        q_funcs.de_queue_vdata(Q, &vdata);
+        printf("After delete queue vdata, the deleted data:");
+        visitnode_queue(vdata->val);
+        printf("\n");
+        destroy_vdata(&vdata);
+
+        printf("The top data:");
+        q_funcs.get_queue_head_vdata(Q, &vdata);
+        visitnode_queue(vdata->val);
+        printf("\n");
+        vdata = NULL;
+        i = 100;
+        init_vdata(&vdata, V_INT, &i, sizeof(i));
+        q_funcs.en_queue_vdata(Q, vdata);
+        printf("After en queue vdata, the list:");
+        q_funcs.queue_traverse(Q, visitnode_queue);
     }
     q_funcs.clear_queue(Q);
     if(!q_funcs.queue_empty(Q))
