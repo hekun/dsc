@@ -435,6 +435,10 @@ static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t siz
         && type == sig_attr->head->data->type
         && size == sig_attr->head->data->val_size);
     sig_node_t *node = sig_attr->head;
+    if(type == V_POINT)
+    {
+        
+    }
     Memcpy(val, node->data->val, size, size);
     if(sig_attr->len == 1)
     {

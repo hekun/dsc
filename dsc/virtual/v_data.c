@@ -5,6 +5,26 @@
 #include "sys_lib.h"
 #include "v_data.h"
 
+/*
+功能描述:
+    初始化抽象数据空间。
+参数说明:
+    
+返回值:
+
+作者:
+    He kun
+日期:
+    2012-12-06
+注意事项:
+    1.创建一个无实际数据的抽象数据空间的方法。
+    v_data_t *data=NULL;
+    init_vdata(&data, V_UNKNOWN_TYPE, NULL, 0);
+    2.若type=V_POINT类型，data->val存储指针值。
+    如果type!=V_POINT类型，data->val会指向一个新建的堆空间，并将实际数据
+    复制到该堆空间中。若没有实际数据，则不建立堆空间。
+    即等价于init_vdata(&data, V_UNKNOWN_TYPE, NULL, 0);
+*/
 
 Status init_vdata(v_data_t **vdata, v_type_t type,
                 void *val, size_t val_size)
@@ -45,18 +65,18 @@ Status init_vdata(v_data_t **vdata, v_type_t type,
         case V_LONG_DOUBLE:
         case V_UNSIGNED_LONG_DOUBLE:
         case V_CUSTOM:
-            rc = Malloc((void * *) &(tmp_vdata->val), val_size);
-            if(rc != OK)
-            {
-                err_ret(LOG_FILE_LINE, "Malloc failed.");
-                return ERROR;
-            }
-#ifdef _DEBUG
-            log_msg(LOG_NO_FILE_LINE, "Malloc vdata->val");
-#endif
-            tmp_vdata->val_size = val_size;
             if((val != NULL) && (val_size > 0))
             {
+                tmp_vdata->val_size = val_size;
+                rc = Malloc((void * *) &(tmp_vdata->val), val_size);
+                if(rc != OK)
+                {
+                    err_ret(LOG_FILE_LINE, "Malloc failed.");
+                    return ERROR;
+                }
+#ifdef _DEBUG
+                log_msg(LOG_NO_FILE_LINE, "Malloc vdata->val");
+#endif
                 Memcpy(tmp_vdata->val, val, tmp_vdata->val_size, val_size);
             }
             break;
@@ -72,6 +92,17 @@ Status init_vdata(v_data_t **vdata, v_type_t type,
     return OK;
 }
 
+/*
+功能说明:
+    销毁抽象数据空间。
+作者:
+    He kun
+日期:
+    2012-12-06
+注意事项:
+    若存储有实际数据，需要在销毁前获取指针值。
+    否则实际数据会被销毁。
+*/
 void destroy_vdata(v_data_t **vdata)
 {
     if(!empty_vdata(*vdata) && ((*vdata)->type != V_POINT))
@@ -88,6 +119,21 @@ void destroy_vdata(v_data_t **vdata)
     log_msg(LOG_NO_FILE_LINE, "FREE vdata");
 #endif
 }
+/*
+功能描述:
+    向抽象数据类型中赋值。
+参数说明:
+
+返回值:
+
+作者:
+    He kun
+日期:
+    2012-12-06
+注意事项:
+
+*/
+
 Status set_vdata(v_data_t *vdata, v_type_t type,
                       void *pdata, size_t data_size)
 {
@@ -104,23 +150,37 @@ Status set_vdata(v_data_t *vdata, v_type_t type,
             err_ret(LOG_FILE_LINE, "vdata error.");
             return ERROR;
         }
-        rc = Malloc((void * *) &(vdata->val), data_size);
-        if(rc != OK)
-        {
-            err_ret(LOG_FILE_LINE, "Malloc failed.");
-            return rc;
-        }
-#ifdef _DEBUG
-        log_msg(LOG_NO_FILE_LINE, "Malloc vdata->val");
-#endif		
         vdata->val_size = data_size;
         vdata->type = type;
-        rc = Memcpy(vdata->val, pdata, vdata->val_size, data_size);
-        if(rc != OK)
+        if(type == V_POINT)
         {
-            err_ret(LOG_FILE_LINE, "Malloc failed.");
+            vdata->val = pdata;
+        }
+        else if(pdata && data_size > 0)
+        {
+            rc = Malloc((void * *) &(vdata->val), data_size);
+            if(rc != OK)
+            {
+                err_ret(LOG_FILE_LINE, "Malloc failed.");
+                return rc;
+            }
+#ifdef _DEBUG
+            log_msg(LOG_NO_FILE_LINE, "Malloc vdata->val");
+#endif	
+            rc = Memcpy(vdata->val, pdata, vdata->val_size, data_size);
+            if(rc != OK)
+            {
+                Free((void * *) &vdata->val);
+                err_ret(LOG_FILE_LINE, "Malloc failed.");
+                return rc;
+            } 
+        }
+        else
+        {
+            err_ret(LOG_FILE_LINE,"val , data_size error.");
             return rc;
-        } 
+        }
+
     }
     //当vdata->type != V_UNKNOWN_TYPE时，则赋值前提是两类型一致。
     else if(vdata->type == type)
@@ -148,6 +208,7 @@ Status set_vdata(v_data_t *vdata, v_type_t type,
             rc = Memcpy(vdata->val, pdata, vdata->val_size, data_size);
             if(rc != OK)
             {
+                Free((void * *) &vdata->val);
                 err_ret(LOG_FILE_LINE, "Malloc failed.");
                 return rc;
             } 
