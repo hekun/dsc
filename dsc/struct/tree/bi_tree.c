@@ -17,6 +17,27 @@ struct TREE_T
 
 /*
 功能描述:
+    递归方式创建二叉树。
+参数说明:
+    
+返回值:
+    
+作者:
+    He kun
+日期:
+    2012-12-13
+*/
+
+static Status CreateBiTree(TREE_T root, queue_attr_t*data, queue_funcs_t *q_func)
+{
+    if(!root)
+    {
+        q_func->de_queue();
+    }
+}
+
+/*
+功能描述:
     非递归方式先序遍历二叉树
 参数说明:
     root--二叉树根节点
