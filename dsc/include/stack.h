@@ -24,7 +24,7 @@ typedef Status  (*GetTop)(STACK_T stack, v_type_t type, void **val, size_t size)
 typedef Status  (*GetTopVdata) (STACK_T stack, v_data_t **vdata);
 typedef Status  (*Push) (STACK_T stack, v_type_t type, void *val, size_t size);
 typedef Status  (*PushVdata) (STACK_T stack, v_data_t *vdata);
-typedef void    (*Pop) (STACK_T stack, v_type_t type, void *val, size_t size);
+typedef void    (*Pop) (STACK_T stack, v_type_t type, void **val, size_t size);
 typedef Status  (*PopVdata) (STACK_T stack, v_data_t **vdata);
 typedef Status  (*StackTraverse) (STACK_T stack, stack_visit vist);
 

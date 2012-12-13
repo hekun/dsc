@@ -25,7 +25,7 @@ typedef Status  (*InsertFirstVal) (LINK_T link, v_type_t type, void * val, size_
 typedef Status  (*InsertFirstVdata) (LINK_T link, v_data_t *vdata);
 typedef Status  (*opt_visit) (void *val);
 typedef Status  (*LinkTraverse) (LINK_T link, opt_visit visit);
-typedef void    (*DelFirstVal) (LINK_T link,v_type_t type, void *val, size_t size);
+typedef void    (*DelFirstVal) (LINK_T link,v_type_t type, void **val, size_t size);
 typedef Status  (*DelFirstVdata) (LINK_T link, v_data_t **vdata);
 typedef void    (*GetFirstVal) (LINK_T link,v_type_t type, void **val, size_t size);
 typedef void    (*GetLinkLength) (LINK_T link, Int32_t *len);

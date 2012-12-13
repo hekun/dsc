@@ -24,6 +24,7 @@ static void link_test(link_type_t type)
 {
     Status rc = OK;
     Int32_t i = 0;
+    Int32_t *ptr_i = &i;
     Int32_t *p_val = NULL;
     Int32_t length = 0;
     v_data_t *data = NULL;
@@ -50,7 +51,7 @@ static void link_test(link_type_t type)
     printf("link1 list:");
     funcs.link_traverse(link1,visitnode_link);
 
-    funcs.del_first_val(link1, V_INT, (void *)&i, sizeof(i));
+    funcs.del_first_val(link1, V_INT, (void **)&ptr_i, sizeof(i));
     printf("The del first data=%d.\n",i);
     printf("After del_firt_val, link1 list:");
     funcs.link_traverse(link1,visitnode_link);

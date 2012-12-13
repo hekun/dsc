@@ -31,7 +31,7 @@ static Status   MakeNode_Vdata_Dob(dob_node_t **p, v_data_t *vdata);
 static void     FreeNode_Dob(dob_node_t * *p);
 static Status   InsertFirstVal_Dob(LINK_T dob_attr, v_type_t type, void * val, size_t size);
 static Status   InsertFirstVdata_Dob(LINK_T dob_attr, v_data_t *vdata);
-static void     DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size);
+static void     DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void **val, size_t size);
 static Status   DelFirstVdata_Dob(LINK_T dob_attr, v_data_t **vdata);
 static Status   LinkTraverse_Dob(LINK_T dob_attr, opt_visit visit);
 static void     GetFirstVal_Dob(LINK_T dob_attr, v_type_t type, void **val, size_t size);
@@ -340,13 +340,20 @@ static Status InsertFirstVdata_Dob(LINK_T dob_attr, v_data_t *vdata)
 完成日期:
     2012-11-02
 */
-static void DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void *val, size_t size)
+static void DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void **val, size_t size)
 {
     assert(!LinkEmpty_Dob(dob_attr) && val
         && type == dob_attr->head->data->type
         && size == dob_attr->head->data->val_size);
     dob_node_t *node = dob_attr->head;
-    Memcpy(val, node->data->val, size, size);
+    if(type == V_POINT)
+    {
+        *val = node;
+    }
+    else
+    {
+        Memcpy(*val, node->data->val, size, size);
+    }
     if(dob_attr->len == 1)
     {
         dob_attr->head = dob_attr->tail = NULL;

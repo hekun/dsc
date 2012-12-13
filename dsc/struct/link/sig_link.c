@@ -32,7 +32,7 @@ static void     FreeNode_Sig(sig_node_t * *p);
 static Status   InsertFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
 static Status   InsertFirstVdata_Sig(LINK_T sig_attr, v_data_t *vdata);
 static Status   LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit);
-static void     DelFirstVal_Sig(LINK_T sig_attr, v_type_t type, void * val, size_t size);
+static void     DelFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
 static Status   DelFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
 static void     GetFirstVal_Sig(LINK_T sig_attr, v_type_t type, void **val, size_t size);
 static void     GetFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata);
@@ -429,7 +429,7 @@ static Status LinkTraverse_Sig(LINK_T sig_attr, opt_visit visit)
 完成日期:
     2012-11-02
 */
-static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t size)
+static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void **val, size_t size)
 {
     assert(!LinkEmpty_Sig(sig_attr) && val
         && type == sig_attr->head->data->type
@@ -437,9 +437,12 @@ static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void *val, size_t siz
     sig_node_t *node = sig_attr->head;
     if(type == V_POINT)
     {
-        
+        *val = node;
     }
-    Memcpy(val, node->data->val, size, size);
+    else
+    {
+        Memcpy(*val, node->data->val, size, size);
+    }
     if(sig_attr->len == 1)
     {
         sig_attr->head = sig_attr->tail = NULL;

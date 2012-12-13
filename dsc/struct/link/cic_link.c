@@ -33,7 +33,7 @@ static Status   InsertFirstVdata_Cic(LINK_T cic_attr, v_data_t *vdata);
 
 
 static Status   LinkTraverse_Cic(LINK_T cic_attr, opt_visit visit);
-static void     DelFirstVal_Cic(LINK_T cic_attr, v_type_t type, void * val, size_t size);
+static void     DelFirstVal_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size);
 static Status   DelFirstVdata_Cic(LINK_T cic_attr, v_data_t **vdata);
 static void     GetFirstVal_Cic(LINK_T cic_attr, v_type_t type, void **val, size_t size);
 static void     GetFirstVdata_Cic(LINK_T cic_attr, v_data_t **vdata);
@@ -350,13 +350,21 @@ static Status InsertFirstVdata_Cic(LINK_T cic_attr, v_data_t *vdata)
 完成日期:
     2012-11-02
 */
-static void DelFirstVal_Cic(LINK_T cic_attr,v_type_t type, void *val, size_t size)
+static void DelFirstVal_Cic(LINK_T cic_attr,v_type_t type, void **val, size_t size)
 {
     assert(!LinkEmpty_Cic(cic_attr) && val
         && type == cic_attr->head->data->type
         && size == cic_attr->head->data->val_size);
     cic_node_t *node = cic_attr->head;
-    Memcpy(val, node->data->val, size, size);
+    if(type == V_POINT)
+    {
+        *val = node;
+    }
+    else
+    {
+        Memcpy(*val, node->data->val, size, size);
+    }
+
     if(cic_attr->len == 1)
     {
         cic_attr->head = cic_attr->tail = NULL;

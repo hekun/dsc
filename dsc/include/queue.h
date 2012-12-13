@@ -29,7 +29,7 @@ typedef Status  (*GetQueueHead_Vdata) (QUEUE_T Q, v_data_t **vdata);
 typedef Status  (*EnQueue)  (QUEUE_T Q, v_type_t type, void *val, size_t size);//在链队列中追加尾元素
 typedef Status  (*EnQueue_Vdata) (QUEUE_T Q, v_data_t *vdata);
 
-typedef void    (*DeQueue)  (QUEUE_T Q, v_type_t type, void *val, size_t size);//删除链队列头元素
+typedef void    (*DeQueue)  (QUEUE_T Q, v_type_t type, void **val, size_t size);//删除链队列头元素
 typedef Status  (*DeQueue_Vdata)(QUEUE_T Q, v_data_t **vdata);
 
 typedef Status  (*QueueTraverse) (QUEUE_T Q, queue_visit visit);//对链队列的每个元素执行visit函数。

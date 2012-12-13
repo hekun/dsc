@@ -33,7 +33,7 @@ static void DestroyStack_Link(STACK_T * stack);
 static Status Push_Link(STACK_T stack, v_type_t type, void * val, size_t size);
 static Status Push_Vdata_Link(STACK_T stack, v_data_t *vdata);
 static Status StackTraverse_Link (STACK_T stack, stack_visit visit);
-static void Pop_Link(STACK_T stack, v_type_t type, void * val, size_t size);
+static void Pop_Link(STACK_T stack, v_type_t type, void **val, size_t size);
 static Status Pop_Vdata_Link(STACK_T stack, v_data_t **vdata);
 static Status GetTop_Link(STACK_T stack, v_type_t type, void **val, size_t size);
 static Status GetTopVdata_Link(STACK_T stack, v_data_t **vdata);
@@ -239,7 +239,7 @@ static Status Push_Vdata_Link(STACK_T stack, v_data_t *vdata)
 ÈÕÆÚ:
     2012-11-05
 */
-static void Pop_Link(STACK_T stack,v_type_t type, void *val, size_t size)
+static void Pop_Link(STACK_T stack,v_type_t type, void **val, size_t size)
 {
     assert(stack && stack->attr);
     stack->depdf.del_first_val(stack->attr,type,val,size);

@@ -37,7 +37,7 @@ static void DestroyQueue_Link(QUEUE_T *Q);
 static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
 static Status EnQueue_Vdata_Link(QUEUE_T Q, v_data_t *vdata);
 
-static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size);
+static void DeQueue_Link(QUEUE_T Q, v_type_t type, void **data, size_t size);
 static Status DeQueue_Vdata_Link(QUEUE_T Q, v_data_t **vdata);
 
 static Status GetQueueHead_Link(QUEUE_T Q, v_type_t type, void **val, size_t size);
@@ -232,7 +232,7 @@ static Status EnQueue_Vdata_Link(QUEUE_T Q, v_data_t *vdata)
 参数说明:
     Q--已存在的链队列属性空间。
     type--数据的实际类型。
-    val--指向实际数据类型的一级指针。
+    data--指向实际数据类型的一级指针。
         如果实际数据是C语言内建的非指针类型，val存储该数据类型的地址。
         如果实际数据是一级指针，val存储指针值。
         如果实际数据是其他类型，则先将数据存入一个结构体中,val存储该结构体地址。
@@ -245,7 +245,7 @@ static Status EnQueue_Vdata_Link(QUEUE_T Q, v_data_t *vdata)
 日期:
     2012-11-13
 */
-static void DeQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
+static void DeQueue_Link(QUEUE_T Q, v_type_t type, void **data, size_t size)
 {
     assert(Q && data);
 

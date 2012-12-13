@@ -22,6 +22,7 @@ static void stack_test(stack_type_t type)
 {
     Status rc = OK;
     Int32_t i = 0;
+    Int32_t *ptr_i = &i;
     Stack_funcs_t stk_funcs;
     stack_attr_t stk = NULL;  
     RegisterStackFuncs(&stk_funcs, type, visitnode_stack);
@@ -44,7 +45,7 @@ static void stack_test(stack_type_t type)
     {
         Int32_t *p_val = NULL;
         stk_funcs.stack_traverse(stk, visitnode_stack);
-        stk_funcs.pop(stk, V_INT, &i, sizeof(i));
+        stk_funcs.pop(stk, V_INT, (void **)&ptr_i, sizeof(i));
         printf("Stack pop data: %d.\n",i);
         printf("After Pop , stack:");
         stk_funcs.stack_traverse(stk, visitnode_stack);

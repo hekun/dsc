@@ -23,6 +23,7 @@ static void queue_test(queue_type_t type)
 {
     Status rc = OK;
     Int32_t i = 0;
+    Int32_t *ptr_i = &i;
     queue_funcs_t q_funcs;
     queue_attr_t Q = NULL;
     RegisterQueueFuncs(&q_funcs,type, visitnode_queue);
@@ -45,7 +46,7 @@ static void queue_test(queue_type_t type)
         Int32_t *p_val = NULL;
         v_data_t *vdata = NULL;
         q_funcs.queue_traverse(Q, visitnode_queue);
-        q_funcs.de_queue(Q, V_INT, &i, sizeof(i));
+        q_funcs.de_queue(Q, V_INT, (void **)&ptr_i, sizeof(i));
         printf("Queue delete data: %d.\n", i);
         printf("After delete, queue:");
         q_funcs.queue_traverse(Q, visitnode_queue);
