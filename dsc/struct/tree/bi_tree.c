@@ -28,12 +28,42 @@ struct TREE_T
     2012-12-13
 */
 
-static Status CreateBiTree(TREE_T root, queue_attr_t*data, queue_funcs_t *q_func)
+static Status CreateTree_Binary(TREE_T *root, queue_attr_t*q_data, queue_funcs_t *q_func)
 {
+    v_data_t *vdata = NULL;
+    Status rc = OK;
+    
     if(!root)
     {
-        q_func->de_queue();
+        q_func->de_queue_vdata(q_data, &vdata);
+        if( get_vdata(vdata) == NULL)
+        {
+            *root = NULL;
+            log_msg(LOG_NO_FILE_LINE, "Create Binary tree NULL node success!");
+            return OK;
+        }
+        else
+        {
+            rc = Malloc((void * *) root,sizeof(**root));
+            if(rc != OK)
+            {
+                err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
+                return rc;
+            }
+            rc = set_vdata((*root)->data, vdata->type, vdata->val, vdata->val_size);
+            if(rc != OK)
+            {
+                Free((void * *)root);
+                err_ret(LOG_FILE_LINE,"set_vdata failed. rc=%d",rc);
+                return rc;
+            }
+        }
+        log_msg(LOG_NO_FILE_LINE, "Create binary tree node success!");
     }
+
+    CreateTree_Binary(&(*root)->left_child, q_data, q_func);
+    CreateTree_Binary(&(*root)->right_child, q_data, q_func);
+    return OK;
 }
 
 /*
@@ -48,7 +78,7 @@ static Status CreateBiTree(TREE_T root, queue_attr_t*data, queue_funcs_t *q_func
 日期:
     2012-12-04
 */
-static Status PreOrderTraverseUnrecursion(TREE_T root, tree_visit visit)
+static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
 {
     assert(root);
     Status rc = OK;
@@ -108,7 +138,28 @@ static Status PreOrderTraverseUnrecursion(TREE_T root, tree_visit visit)
 }
 
 
-
+/*
+功能描述:
+    基于后续遍历方式销毁二叉树。
+参数说明:
+    root--二叉树根节点地址。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-12-14
+*/
+static void DestroyTree_Binary(TREE_T *root)
+{
+    if(root)
+    {
+        DestroyTree_Binary(&(*root)->left_child);
+        DestroyTree_Binary(&(*root)->right_child);
+        destroy_vdata(&(*root)->data);
+        Free((void * *) root);
+    }
+}
 
 
 
