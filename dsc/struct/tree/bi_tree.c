@@ -14,6 +14,12 @@ struct TREE_T
     TREE_T right_child;
 };
 
+static Status CreateTree_Binary(TREE_T *root, queue_attr_t*q_data, queue_funcs_t *q_func);
+static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit);
+static void   DestroyTree_Binary(TREE_T * root);
+
+    
+
 
 /*
 功能描述:
@@ -161,6 +167,26 @@ static void DestroyTree_Binary(TREE_T *root)
     }
 }
 
-
+Status RegisterTreeFuncs_Binary(tree_funcs_t *funcs, tree_visit visit)
+{
+    assert(funcs);
+    Status rc = OK;
+    funcs->create_tree = CreateTree_Binary;
+    funcs->destroy_tree = DestroyTree_Binary;
+    if(visit == NULL)
+    {
+        funcs->opt_funcs.visit = NULL;
+#ifdef _DEBUG
+        log_msg(LOG_NO_FILE_LINE, "tree_visit未定义，二叉树遍历函数无法使用。");
+#endif
+        funcs->preorder_unrecursion = NULL;
+    }
+    else
+    {
+        funcs->opt_funcs.visit = visit;
+        funcs->preorder_unrecursion = PreOrderUnrecursion_Binary;
+    }
+    return rc;
+}
 
 

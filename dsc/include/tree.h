@@ -31,6 +31,7 @@ typedef struct tree_funcs_S
     CreateTree  create_tree;
     DestroyTree destroy_tree;
     PreOrderUnrecursion preorder_unrecursion;
+    tree_opt_funcs_t opt_funcs;
     
 }tree_funcs_t;
 
