@@ -35,7 +35,9 @@ typedef struct tree_funcs_S
     
 }tree_funcs_t;
 
-Status RegisterTreeFuncs(tree_funcs_t *funcs, tree_type_t type, );
+Status RegisterTreeFuncs(tree_funcs_t *funcs, tree_type_t type, tree_visit visit);
+void   LogoutTreeFuncs (tree_funcs_t* funcs);
+
 
 
 #undef TREE_T
