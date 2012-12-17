@@ -1,12 +1,14 @@
 #include <assert.h>
 #include <string.h>
-#include "tree.h"
+#include "sys_lib.h"
 #include "bi_tree.h"
+#include "tree.h"
 
 
 Status RegisterTreeFuncs(tree_funcs_t * funcs, tree_type_t type, tree_visit visit)
 {
     assert(funcs);
+    Status rc = OK;
     switch(type)
     {
         case BINART_TREE:
@@ -14,10 +16,14 @@ Status RegisterTreeFuncs(tree_funcs_t * funcs, tree_type_t type, tree_visit visi
             break;
         default:
             log_msg(LOG_NO_FILE_LINE,"the 2th parameter error.");
+            rc = ERROR;
             break;
     }
+    return rc;
 }
-Status LogoutTreeFuncs(tree_funcs_t* funcs)
+
+
+void LogoutTreeFuncs(tree_funcs_t* funcs)
 {
     if(funcs == NULL)
     {

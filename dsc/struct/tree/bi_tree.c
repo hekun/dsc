@@ -3,6 +3,7 @@
 #include "g_type.h"
 #include "sys_lib.h"
 #include "err_num.h"
+#include "stack.h"
 #include "tree.h"
 
 #define TREE_T tree_attr_t
@@ -14,7 +15,7 @@ struct TREE_T
     TREE_T right_child;
 };
 
-static Status CreateTree_Binary(TREE_T *root, queue_attr_t*q_data, queue_funcs_t *q_func);
+static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
 static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit);
 static void   DestroyTree_Binary(TREE_T * root);
 
@@ -34,7 +35,7 @@ static void   DestroyTree_Binary(TREE_T * root);
     2012-12-13
 */
 
-static Status CreateTree_Binary(TREE_T *root, queue_attr_t*q_data, queue_funcs_t *q_func)
+static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func)
 {
     v_data_t *vdata = NULL;
     Status rc = OK;
@@ -89,10 +90,10 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
     assert(root);
     Status rc = OK;
     stack_attr_t stk;
-    TREE_T cur_addr = NULL;
+    TREE_T cur_root = NULL;
     Stack_funcs_t s_funcs;
     RegisterStackFuncs(&s_funcs, STACK_SIGNAL_LINK_LIST, NULL);
-    rc = s_funcs.init_stack(&stk);
+    rc = s_funcs.init_stack(&stk, STACK_SIGNAL_LINK_LIST, NULL);
     if(rc != OK)
     {
         err_ret(LOG_FILE_LINE,"init_stack failed. rc=%d.",rc);
@@ -110,10 +111,10 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
 
         while(s_funcs.stack_empty(stk) == FALSE)
         {
-            while(s_funcs.get_top(stk,V_POINT, (void **)&cur_addr, sizeof(cur_addr)) == OK 
-                && cur_addr)
+            while(s_funcs.get_top(stk, V_POINT, (void **)&cur_root, sizeof(cur_root)) == OK 
+                && cur_root)
             {
-                rc = s_funcs.push(stk,V_POINT, cur_addr->left_child, sizeof(cur_addr->left_child));
+                rc = s_funcs.push(stk,V_POINT, cur_root->left_child, sizeof(cur_root->left_child));
                 if(rc != OK)
                 {
                     err_ret(LOG_FILE_LINE,"push node failed.rc=%d.",rc);
@@ -125,22 +126,18 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
                 break;
             }
             
-            rc = s_funcs.pop(stk,V_POINT, (void **)&cur_addr, sizeof(cur_addr));
-            if( rc != OK)
-            {
-                err_ret(LOG_FILE_LINE,"Pop node failed.rc=%d.",rc);
-                break;
-            }
+            s_funcs.pop(stk,V_POINT, (void **)&cur_root, sizeof(cur_root));
             if(s_funcs.stack_empty(stk) == FALSE)
             {
-                s_funcs.pop(stk, V_POINT, (void **)&cur_addr, sizeof(cur_addr));
-                visit(get_vdata(cur_addr->data));
-                s_funcs.push(stk,V_POINT, cur_addr->right_child, sizeof(cur_addr));
+                s_funcs.pop(stk, V_POINT, (void **)&cur_root, sizeof(cur_root));
+                visit(get_vdata(cur_root->data));
+                s_funcs.push(stk,V_POINT, cur_root->right_child, sizeof(cur_root));
             }
         }
     }while(0);
     s_funcs.destroy_stack(&stk);
     LogoutStackFuncs(&s_funcs, STACK_SIGNAL_LINK_LIST);
+    return rc;
 }
 
 

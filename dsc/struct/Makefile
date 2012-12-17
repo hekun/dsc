@@ -1,4 +1,4 @@
-DIRS=link stack queue
+DIRS=link stack queue tree
 all:
 	@for i in $(DIRS); do \
 		echo Making all in $${i}; \

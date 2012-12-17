@@ -8,6 +8,7 @@
 #define TREE_T  tree_attr_t
 typedef struct  TREE_T *TREE_T;
 
+
 typedef enum tree_type_E
 {
     UNKNOWN_TREE,
@@ -15,9 +16,9 @@ typedef enum tree_type_E
 }tree_type_t;
 
 
-typedef Status  (*tree_visit) (TREE_T root);
-typedef Status (*CreateTree) (TREE_T root, queue_attr_t *q_data, queue_funcs_t *q_func);
-typedef Status (*DestroyTree) (v_data_t **vdata);
+typedef Status (*tree_visit) (TREE_T root);
+typedef Status (*CreateTree) (TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
+typedef void   (*DestroyTree) (TREE_T *root);
 typedef Status (*PreOrderUnrecursion) (TREE_T root, tree_visit visit);
 
 typedef struct tree_opt_funcs_S

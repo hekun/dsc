@@ -5,7 +5,6 @@
 #include "tree.h"
 
 
-void RegisterTreeFuncs_Binary(Stack_funcs_t * stk_funcs, stack_type_t type, stack_visit visit);
-void LogoutTreeFuncs_Binary(Stack_funcs_t * stk_funcs);
+Status RegisterTreeFuncs_Binary(tree_funcs_t *funcs, tree_visit visit);
 
 #endif
