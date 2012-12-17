@@ -125,7 +125,6 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
             {
                 break;
             }
-            
             s_funcs.pop(stk,V_POINT, (void **)&cur_root, sizeof(cur_root));
             if(s_funcs.stack_empty(stk) == FALSE)
             {

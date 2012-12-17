@@ -529,7 +529,7 @@ static void GetLinkLength_Sig(LINK_T sig_attr, Int32_t *len)
 */
 static Status AppendVal_Sig(LINK_T sig_attr, v_type_t type, void *val, size_t size)
 {
-    assert(sig_attr && val);
+    assert(sig_attr);
     Status rc = OK;
     sig_node_t *node = NULL;
     rc = MakeNode_Val_Sig(&node, type, val, size);

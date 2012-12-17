@@ -16,7 +16,7 @@ typedef enum tree_type_E
 }tree_type_t;
 
 
-typedef Status (*tree_visit) (TREE_T root);
+typedef Status (*tree_visit) (void * val);
 typedef Status (*CreateTree) (TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
 typedef void   (*DestroyTree) (TREE_T *root);
 typedef Status (*PreOrderUnrecursion) (TREE_T root, tree_visit visit);

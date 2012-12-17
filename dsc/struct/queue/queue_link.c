@@ -191,7 +191,7 @@ static void DestroyQueue_Link(QUEUE_T *Q)
 */
 static Status EnQueue_Link(QUEUE_T Q, v_type_t type, void *data, size_t size)
 {
-    assert(Q && data);
+    assert(Q);
     Status rc = OK;
     rc = Q->depdf.append_val(Q->attr, type, data, size);
     if(rc != OK)
@@ -464,7 +464,7 @@ void RegisterQueueFuncs_Link(queue_funcs_t * q_funcs, queue_type_t type, queue_v
     {
         q_funcs->opt_func.visit = NULL;
 #ifdef _DEBUG
-        log_msg(LOG_NO_FILE_LINE, "opt_visit未定义，QueueTraverse函数无法使用。");
+        log_msg(LOG_NO_FILE_LINE, "queue_visit未定义，QueueTraverse函数无法使用。");
 #endif
         q_funcs->queue_traverse = NULL;
     }
