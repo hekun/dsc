@@ -40,7 +40,7 @@ static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t
     v_data_t *vdata = NULL;
     Status rc = OK;
     
-    if(!root)
+    if(!*root)
     {
         q_func->de_queue_vdata(q_data, &vdata);
         if( get_vdata(vdata) == NULL)
@@ -57,7 +57,7 @@ static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t
                 err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
                 return rc;
             }
-            rc = set_vdata((*root)->data, vdata->type, vdata->val, vdata->val_size);
+            rc = init_vdata(&(*root)->data, vdata->type, vdata->val, vdata->val_size);
             if(rc != OK)
             {
                 Free((void * *)root);

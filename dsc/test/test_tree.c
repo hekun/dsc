@@ -79,8 +79,15 @@ static Status test_tree(tree_type_t type)
 
 static Status visitnode_tree(void *val)
 {
-    assert(val);
-    printf("%d",*(Int32_t *)val);
+    if(!val)
+    {
+        printf("NULL\n");
+    }
+    else
+    {
+        printf("%d\n",*(Int32_t *)val);
+    }
+    
     return OK;
 
 }
