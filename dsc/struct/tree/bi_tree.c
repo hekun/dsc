@@ -26,11 +26,13 @@ static void * GetTreeVal(TREE_T root);
 
 /*
 功能描述:
-    递归方式创建二叉树。
+    递归方式先序方式创建二叉树。
 参数说明:
-    
+    root--二叉树根节点二级指针。
+    q_data--存储输入的二叉树各节点的实际数据。
 返回值:
-    
+    OK--创建节点成功。
+    !OK--创建节点失败。
 作者:
     He kun
 日期:
@@ -140,7 +142,7 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
             if(s_funcs.stack_empty(stk) == FALSE)
             {
                 s_funcs.pop(stk, V_POINT, (void **)&cur_root, sizeof(cur_root));
-                visit(get_vdata(cur_root->data));
+                visit(GetTreeVal(root));
                 s_funcs.push(stk,V_POINT, cur_root->right_child, sizeof(cur_root));
             }
         }
@@ -157,28 +159,54 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
     root--二叉树根节点。
     visit--遍历节点操作函数。
 返回值:
+    TRUE--该节点为空。
+    FALSE--该节点有数据。
+作者:
+    He kun
+日期:
+    2012-12-20
+*/
+static void PreOrderRecursion_Binary(TREE_T root, tree_visit visit)
+{
+    void * val = NULL;
+    val = GetTreeVal(root);
+    if(val != NULL)
+    {
+        visit(val);
+        PreOrderRecursion_Binary(root->left_child, visit);
+        PreOrderRecursion_Binary(root->right_child, visit);
+    }
+
+}
+
+/*
+功能说明:
+    中序遍历递归实现。
+参数说明:
+    root--二叉树根节点。
+    visit--根节点操作函数。
+返回值:
     无
 作者:
     He kun
 日期:
     2012-12-20
 */
-static Status PreOrderRecursion_Binary(TREE_T root, tree_visit visit)
+static void MidOrderRecusion_Binary(TREE_T root, tree_visit visit)
 {
     void * val = NULL;
     val = GetTreeVal(root);
-    visit(val);
-    if(val == NULL)
+
+    if(!val)
     {
-        return TRUE;
+        MidOrderRecusion_Binary(root->left_child, visit);
+        visit(val);   
+        MidOrderRecusion_Binary(root->right_child, visit);
     }
-    else
-    {
-        PreOrderRecursion_Binary(root->left_child, visit);
-        PreOrderRecursion_Binary(root->right_child, visit);
-    }
-    return FALSE;
+
 }
+
+
 
 /*
 功能描述:

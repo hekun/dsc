@@ -62,7 +62,11 @@ static Status tree_test(tree_type_t type)
             err_ret(LOG_NO_FILE_LINE,"create binary tree failed. rc=%d.",rc);
             break;
         }
+#ifdef _DEBUG
+        log_msg(LOG_NO_FILE_LINE, "Binary tree Pre Order:");
+#endif
         tree_funcs.preorder_recursion(root, visitnode_tree);
+
     }while(0);
     tree_funcs.destroy_tree(&root);
     queue_funcs.clear_queue(data);
