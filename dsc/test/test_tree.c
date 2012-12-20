@@ -5,19 +5,19 @@
 #include "tree.h"
 /*124##5##36##7##*/
 static Status visitnode_tree(void *val);
-static Status test_tree(tree_type_t type);
+static Status tree_test(tree_type_t type);
 
 #define BUFFER_SIZE     65535
 
 Int32_t main(void)
 {
     log_msg(LOG_NO_FILE_LINE,"--------BINARY TREE TEST--------");
-    test_tree(BINART_TREE);
+    tree_test(BINART_TREE);
     return OK;
 }
 
 
-static Status test_tree(tree_type_t type)
+static Status tree_test(tree_type_t type)
 {
     Status rc = OK;
     Int32_t i = 0;
@@ -28,8 +28,8 @@ static Status test_tree(tree_type_t type)
     queue_funcs_t queue_funcs;
     memset(buffer,'\0',sizeof(buffer));
     RegisterTreeFuncs(&tree_funcs, type, visitnode_tree);
-    RegisterQueueFuncs(&queue_funcs, type, NULL);
-    queue_funcs.init_queue(&data, type, NULL);
+    RegisterQueueFuncs(&queue_funcs, QUEUE_SIGNAL_LINK_LIST, NULL);
+    queue_funcs.init_queue(&data, QUEUE_SIGNAL_LINK_LIST, NULL);
     printf("Input val string:\n");
     scanf("%s",buffer);
     while(buffer[i] != '\0')
@@ -62,14 +62,10 @@ static Status test_tree(tree_type_t type)
             err_ret(LOG_NO_FILE_LINE,"create binary tree failed. rc=%d.",rc);
             break;
         }
-        rc = tree_funcs.preorder_unrecursion(root, visitnode_tree);
-        if(rc != OK)
-        {
-            err_ret(LOG_NO_FILE_LINE,"Perorder bintary tree failed. rc=%d.",rc);
-            break;
-        }
+        tree_funcs.preorder_recursion(root, visitnode_tree);
     }while(0);
     tree_funcs.destroy_tree(&root);
+    queue_funcs.clear_queue(data);
     queue_funcs.destroy_queue(&data);
     
     LogoutqueueFuncs(&queue_funcs, type);
@@ -85,7 +81,7 @@ static Status visitnode_tree(void *val)
     }
     else
     {
-        printf("%d\n",*(Int32_t *)val);
+        printf("%c\n",*(Char8_t *)val);
     }
     
     return OK;

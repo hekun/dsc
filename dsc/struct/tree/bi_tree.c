@@ -18,6 +18,8 @@ struct TREE_T
 static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
 static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit);
 static void   DestroyTree_Binary(TREE_T * root);
+static Status PreOrderRecursion_Binary(TREE_T root, tree_visit visit);
+static void * GetTreeVal(TREE_T root);
 
     
 
@@ -46,26 +48,34 @@ static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t
         if( get_vdata(vdata) == NULL)
         {
             *root = NULL;
-            log_msg(LOG_NO_FILE_LINE, "Create Binary tree NULL node success!");
-            return OK;
+            destroy_vdata(&vdata);
+            return rc;
         }
         else
         {
-            rc = Malloc((void * *) root,sizeof(**root));
-            if(rc != OK)
+            do
             {
-                err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
-                return rc;
-            }
-            rc = init_vdata(&(*root)->data, vdata->type, vdata->val, vdata->val_size);
-            if(rc != OK)
-            {
-                Free((void * *)root);
-                err_ret(LOG_FILE_LINE,"set_vdata failed. rc=%d",rc);
-                return rc;
-            }
+                rc = Malloc((void * *) root,sizeof(**root));
+                if(rc != OK)
+                {
+                    err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
+                    break;
+                }
+                rc = init_vdata(&(*root)->data, vdata->type, vdata->val, vdata->val_size);
+                if(rc != OK)
+                {
+                    Free((void * *)root);
+                    err_ret(LOG_FILE_LINE,"set_vdata failed. rc=%d",rc);
+                    break;
+                }
+            }while(0);
         }
-        log_msg(LOG_NO_FILE_LINE, "Create binary tree node success!");
+        destroy_vdata(&vdata);
+        if(rc != OK)
+        {
+            log_msg(LOG_NO_FILE_LINE, "Create binary tree node failed!.");
+            return rc;
+        }
     }
 
     CreateTree_Binary(&(*root)->left_child, q_data, q_func);
@@ -119,7 +129,8 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
                 {
                     err_ret(LOG_FILE_LINE,"push node failed.rc=%d.",rc);
                     break;
-                }              
+                }  
+                log_msg(LOG_FILE_LINE, "push left child data ,ptr=%p", get_vdata(cur_root->left_child->data));
             }
             if(rc != OK)
             {
@@ -139,7 +150,61 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
     return rc;
 }
 
+/*
+功能描述:
+    递归方式先序遍历二叉树。
+参数说明:
+    root--二叉树根节点。
+    visit--遍历节点操作函数。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-12-20
+*/
+static Status PreOrderRecursion_Binary(TREE_T root, tree_visit visit)
+{
+    void * val = NULL;
+    val = GetTreeVal(root);
+    visit(val);
+    if(val == NULL)
+    {
+        return TRUE;
+    }
+    else
+    {
+        PreOrderRecursion_Binary(root->left_child, visit);
+        PreOrderRecursion_Binary(root->right_child, visit);
+    }
+    return FALSE;
+}
 
+/*
+功能描述:
+    获取结点实际数据块首地址。
+参数说明:
+    root--根节点。
+返回值:
+    NULL--根节点地址为空。
+    !NULL--实际数据块首地址。
+作者:
+    He kun
+日期:
+    2012-12-20
+
+*/
+static void * GetTreeVal(TREE_T root)
+{
+    if(root)
+    {
+        return get_vdata(root->data);
+    }
+    else
+    {
+        return NULL;
+    }
+}
 /*
 功能描述:
     基于后续遍历方式销毁二叉树。
@@ -154,7 +219,7 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
 */
 static void DestroyTree_Binary(TREE_T *root)
 {
-    if(root)
+    if(*root)
     {
         DestroyTree_Binary(&(*root)->left_child);
         DestroyTree_Binary(&(*root)->right_child);
@@ -176,11 +241,13 @@ Status RegisterTreeFuncs_Binary(tree_funcs_t *funcs, tree_visit visit)
         log_msg(LOG_NO_FILE_LINE, "tree_visit未定义，二叉树遍历函数无法使用。");
 #endif
         funcs->preorder_unrecursion = NULL;
+        funcs->preorder_recursion = NULL;
     }
     else
     {
         funcs->opt_funcs.visit = visit;
         funcs->preorder_unrecursion = PreOrderUnrecursion_Binary;
+        funcs->preorder_recursion = PreOrderRecursion_Binary;
     }
     return rc;
 }

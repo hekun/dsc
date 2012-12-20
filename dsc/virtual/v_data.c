@@ -224,7 +224,10 @@ Status set_vdata(v_data_t *vdata, v_type_t type,
 
 void * get_vdata(v_data_t *vdata)
 {
-	assert(vdata != NULL);
+    if(!vdata)
+    {
+        return NULL;
+    }
 	if((vdata->val != NULL) && (vdata->val_size >0) && (vdata->type != V_UNKNOWN_TYPE))
 	{
     	return vdata->val;

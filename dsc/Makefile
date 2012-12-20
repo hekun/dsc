@@ -3,7 +3,7 @@ all:
 	@for i in $(DIRS); do \
 		echo Making all in $${i}; \
 		cd $${i}; \
-		make -s; \
+		make; \
 		cd ..; \
 	done
 

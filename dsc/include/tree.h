@@ -20,7 +20,7 @@ typedef Status (*tree_visit) (void * val);
 typedef Status (*CreateTree) (TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
 typedef void   (*DestroyTree) (TREE_T *root);
 typedef Status (*PreOrderUnrecursion) (TREE_T root, tree_visit visit);
-
+typedef Status (*PreOrderRecursion) (TREE_T root, tree_visit visit);
 typedef struct tree_opt_funcs_S
 {
     tree_visit visit;
@@ -32,6 +32,7 @@ typedef struct tree_funcs_S
     CreateTree  create_tree;
     DestroyTree destroy_tree;
     PreOrderUnrecursion preorder_unrecursion;
+    PreOrderRecursion   preorder_recursion;
     tree_opt_funcs_t opt_funcs;
     
 }tree_funcs_t;
