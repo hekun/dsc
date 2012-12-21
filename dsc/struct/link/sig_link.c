@@ -437,7 +437,7 @@ static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void **val, size_t si
     sig_node_t *node = sig_attr->head;
     if(type == V_POINT)
     {
-        *val = node;
+        *val = node->data->val;
     }
     else
     {

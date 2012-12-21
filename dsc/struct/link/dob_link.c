@@ -348,7 +348,7 @@ static void DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void **val, size_t si
     dob_node_t *node = dob_attr->head;
     if(type == V_POINT)
     {
-        *val = node;
+        *val = node->data->val;
     }
     else
     {

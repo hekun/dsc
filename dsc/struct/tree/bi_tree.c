@@ -18,7 +18,10 @@ struct TREE_T
 static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
 static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit);
 static void   DestroyTree_Binary(TREE_T * root);
-static Status PreOrderRecursion_Binary(TREE_T root, tree_visit visit);
+static void   PreOrderRecursion_Binary(TREE_T root, tree_visit visit);
+static void   MidOrderRecusion_Binary(TREE_T root, tree_visit visit);
+static void   PostOrderRecusion_Binary(TREE_T root, tree_visit visit);
+
 static void * GetTreeVal(TREE_T root);
 
     
@@ -101,7 +104,7 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
 {
     assert(root);
     Status rc = OK;
-    stack_attr_t stk;
+    stack_attr_t stk = NULL;
     TREE_T cur_root = NULL;
     Stack_funcs_t s_funcs;
     RegisterStackFuncs(&s_funcs, STACK_SIGNAL_LINK_LIST, NULL);
@@ -132,17 +135,17 @@ static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
                     err_ret(LOG_FILE_LINE,"push node failed.rc=%d.",rc);
                     break;
                 }  
-                log_msg(LOG_FILE_LINE, "push left child data ,ptr=%p", get_vdata(cur_root->left_child->data));
             }
             if(rc != OK)
             {
                 break;
             }
-            s_funcs.pop(stk,V_POINT, (void **)&cur_root, sizeof(cur_root));
+            s_funcs.pop(stk, V_POINT, (void **)&cur_root, sizeof(cur_root));
+            visit(GetTreeVal(cur_root));
             if(s_funcs.stack_empty(stk) == FALSE)
             {
                 s_funcs.pop(stk, V_POINT, (void **)&cur_root, sizeof(cur_root));
-                visit(GetTreeVal(root));
+                visit(GetTreeVal(cur_root));
                 s_funcs.push(stk,V_POINT, cur_root->right_child, sizeof(cur_root));
             }
         }
@@ -170,7 +173,7 @@ static void PreOrderRecursion_Binary(TREE_T root, tree_visit visit)
 {
     void * val = NULL;
     val = GetTreeVal(root);
-    if(val != NULL)
+    if(val)
     {
         visit(val);
         PreOrderRecursion_Binary(root->left_child, visit);
@@ -197,7 +200,7 @@ static void MidOrderRecusion_Binary(TREE_T root, tree_visit visit)
     void * val = NULL;
     val = GetTreeVal(root);
 
-    if(!val)
+    if(val)
     {
         MidOrderRecusion_Binary(root->left_child, visit);
         visit(val);   
@@ -207,6 +210,31 @@ static void MidOrderRecusion_Binary(TREE_T root, tree_visit visit)
 }
 
 
+/*
+功能描述:
+    后续遍历递归实现
+参数说明:
+    root--二叉树根节点。
+    visit--根节点操作函数。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-12-21
+
+*/
+static void PostOrderRecusion_Binary(TREE_T root, tree_visit visit)
+{
+    void * val = NULL;
+    val = GetTreeVal(root);
+    if(val)
+    {
+        PostOrderRecusion_Binary(root->left_child, visit);
+        PostOrderRecusion_Binary(root->right_child, visit);
+        visit(val);
+    }
+}
 
 /*
 功能描述:
@@ -270,12 +298,17 @@ Status RegisterTreeFuncs_Binary(tree_funcs_t *funcs, tree_visit visit)
 #endif
         funcs->preorder_unrecursion = NULL;
         funcs->preorder_recursion = NULL;
+        funcs->midorder_recursion = NULL;
+        funcs->preorder_recursion = NULL;
+        funcs->postorder_recusion = NULL;
     }
     else
     {
         funcs->opt_funcs.visit = visit;
         funcs->preorder_unrecursion = PreOrderUnrecursion_Binary;
         funcs->preorder_recursion = PreOrderRecursion_Binary;
+        funcs->midorder_recursion = MidOrderRecusion_Binary;
+        funcs->postorder_recusion = PostOrderRecusion_Binary;
     }
     return rc;
 }

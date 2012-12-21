@@ -358,7 +358,7 @@ static void DelFirstVal_Cic(LINK_T cic_attr,v_type_t type, void **val, size_t si
     cic_node_t *node = cic_attr->head;
     if(type == V_POINT)
     {
-        *val = node;
+        *val = node->data->val;
     }
     else
     {
