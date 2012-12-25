@@ -16,11 +16,11 @@ struct TREE_T
 };
 
 static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
-static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit);
 static void   DestroyTree_Binary(TREE_T * root);
-static void   PreOrderRecursion_Binary(TREE_T root, tree_visit visit);
 static void   MidOrderRecusion_Binary(TREE_T root, tree_visit visit);
 static void   PostOrderRecusion_Binary(TREE_T root, tree_visit visit);
+static void   PreOrderRecursion_Binary(TREE_T root, tree_visit visit);
+static Status LevelOrderTraverse_Binary(TREE_T root,tree_visit visit);
 
 static void * GetTreeVal(TREE_T root);
 
@@ -41,7 +41,6 @@ static void * GetTreeVal(TREE_T root);
 日期:
     2012-12-13
 */
-
 static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func)
 {
     v_data_t *vdata = NULL;
@@ -88,72 +87,6 @@ static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t
     return OK;
 }
 
-/*
-功能描述:
-    非递归方式先序遍历二叉树
-参数说明:
-    root--二叉树根节点
-返回值:
-
-作者:
-    He kun
-日期:
-    2012-12-04
-*/
-static Status PreOrderUnrecursion_Binary(TREE_T root, tree_visit visit)
-{
-    assert(root);
-    Status rc = OK;
-    stack_attr_t stk = NULL;
-    TREE_T cur_root = NULL;
-    Stack_funcs_t s_funcs;
-    RegisterStackFuncs(&s_funcs, STACK_SIGNAL_LINK_LIST, NULL);
-    rc = s_funcs.init_stack(&stk, STACK_SIGNAL_LINK_LIST, NULL);
-    if(rc != OK)
-    {
-        err_ret(LOG_FILE_LINE,"init_stack failed. rc=%d.",rc);
-        LogoutStackFuncs(&s_funcs, STACK_SIGNAL_LINK_LIST);
-        return rc;
-    }
-    do
-    {
-        rc = s_funcs.push(stk, V_POINT, root, sizeof(root));
-        if(rc != OK)
-        {
-            err_ret(LOG_FILE_LINE,"push node failed.rc=%d.",rc);
-            break;
-        }
-
-        while(s_funcs.stack_empty(stk) == FALSE)
-        {
-            while(s_funcs.get_top(stk, V_POINT, (void **)&cur_root, sizeof(cur_root)) == OK 
-                && cur_root)
-            {
-                rc = s_funcs.push(stk,V_POINT, cur_root->left_child, sizeof(cur_root->left_child));
-                if(rc != OK)
-                {
-                    err_ret(LOG_FILE_LINE,"push node failed.rc=%d.",rc);
-                    break;
-                }  
-            }
-            if(rc != OK)
-            {
-                break;
-            }
-            s_funcs.pop(stk, V_POINT, (void **)&cur_root, sizeof(cur_root));
-            visit(GetTreeVal(cur_root));
-            if(s_funcs.stack_empty(stk) == FALSE)
-            {
-                s_funcs.pop(stk, V_POINT, (void **)&cur_root, sizeof(cur_root));
-                visit(GetTreeVal(cur_root));
-                s_funcs.push(stk,V_POINT, cur_root->right_child, sizeof(cur_root));
-            }
-        }
-    }while(0);
-    s_funcs.destroy_stack(&stk);
-    LogoutStackFuncs(&s_funcs, STACK_SIGNAL_LINK_LIST);
-    return rc;
-}
 
 /*
 功能描述:
@@ -222,7 +155,6 @@ static void MidOrderRecusion_Binary(TREE_T root, tree_visit visit)
     He kun
 日期:
     2012-12-21
-
 */
 static void PostOrderRecusion_Binary(TREE_T root, tree_visit visit)
 {
@@ -248,7 +180,6 @@ static void PostOrderRecusion_Binary(TREE_T root, tree_visit visit)
     He kun
 日期:
     2012-12-20
-
 */
 static void * GetTreeVal(TREE_T root)
 {
@@ -284,6 +215,98 @@ static void DestroyTree_Binary(TREE_T *root)
     }
 }
 
+/*
+功能描述:
+    利用队列实现二叉树的层次遍历
+参数说明:
+    
+返回值:
+    
+作者:
+    He kun
+日期:
+    2012-12-25
+*/
+static Status  LevelOrderTraverse_Binary(TREE_T root,tree_visit visit)
+{
+    assert(root && visit);
+    Status rc = OK;
+    tree_attr_t node_addr = NULL;
+    queue_attr_t q = NULL;
+    queue_attr_t output = NULL;
+    queue_funcs_t q_funcs;
+    
+    
+    RegisterQueueFuncs(&q_funcs, QUEUE_SIGNAL_LINK_LIST, NULL);
+    rc = q_funcs.init_queue(&q, QUEUE_SIGNAL_LINK_LIST,NULL);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"init_queue failed.rc=%d.",rc);
+        return rc;
+    }    
+    rc = q_funcs.init_queue(&output,QUEUE_SIGNAL_LINK_LIST,NULL);
+    if(rc != OK)
+    {
+        q_funcs.destroy_queue(&q);
+        err_ret(LOG_FILE_LINE,"destroy_queue failed. rc=%d.",rc);
+        return rc;
+    }
+
+    do
+    {
+        rc = q_funcs.en_queue(q, V_POINT, root, sizeof(root));
+        if(rc != OK)
+        {
+            err_ret(LOG_FILE_LINE,"en_queue failed. rc=%d.",rc);
+            break;
+        }
+        while(q_funcs.queue_empty(q) == FALSE)
+        {
+            q_funcs.de_queue(q, V_POINT, (void **)&node_addr, sizeof(node_addr));
+            rc = q_funcs.en_queue(output, V_POINT, node_addr, sizeof(node_addr));
+            if(rc != OK)
+            {
+                err_ret(LOG_FILE_LINE,"en_queue failed, rc=%d.",rc);
+                break;
+            }
+            if(node_addr->left_child)
+            {
+                rc = q_funcs.en_queue(q, V_POINT, node_addr->left_child, sizeof(node_addr->left_child));
+                if(rc != OK)
+                {
+                    err_ret(LOG_FILE_LINE,"en_queue failed, rc=%d.",rc);
+                    break;
+                }
+            }
+            if(node_addr->right_child)
+            {
+                rc= q_funcs.en_queue(q,V_POINT, node_addr->right_child, sizeof(node_addr->right_child));
+                if(rc != OK)
+                {
+                    err_ret(LOG_FILE_LINE,"en_queue failed, rc=%d.",rc);
+                    break;
+                }
+
+            }
+        }
+    }while(0);
+    printf("Output:\n");
+    while(q_funcs.queue_empty(output) == FALSE)
+    {
+        q_funcs.de_queue(output, V_POINT, (void **)&node_addr, sizeof(node_addr));
+        visit(GetTreeVal(node_addr));
+    }
+    
+    q_funcs.clear_queue(q);
+    q_funcs.clear_queue(output);
+    q_funcs.destroy_queue(&q);
+    q_funcs.destroy_queue(&output);
+    return rc;
+}
+
+
+
+
 Status RegisterTreeFuncs_Binary(tree_funcs_t *funcs, tree_visit visit)
 {
     assert(funcs);
@@ -296,19 +319,19 @@ Status RegisterTreeFuncs_Binary(tree_funcs_t *funcs, tree_visit visit)
 #ifdef _DEBUG
         log_msg(LOG_NO_FILE_LINE, "tree_visit未定义，二叉树遍历函数无法使用。");
 #endif
-        funcs->preorder_unrecursion = NULL;
         funcs->preorder_recursion = NULL;
         funcs->midorder_recursion = NULL;
         funcs->preorder_recursion = NULL;
         funcs->postorder_recusion = NULL;
+        funcs->level_order = NULL;
     }
     else
     {
         funcs->opt_funcs.visit = visit;
-        funcs->preorder_unrecursion = PreOrderUnrecursion_Binary;
         funcs->preorder_recursion = PreOrderRecursion_Binary;
         funcs->midorder_recursion = MidOrderRecusion_Binary;
         funcs->postorder_recusion = PostOrderRecusion_Binary;
+        funcs->level_order = LevelOrderTraverse_Binary;
     }
     return rc;
 }
