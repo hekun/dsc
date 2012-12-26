@@ -274,7 +274,6 @@ static Status  LevelOrderTraverse_Binary(TREE_T root,tree_visit visit)
                 rc = q_funcs.en_queue(q, V_POINT, node_addr->left_child, sizeof(node_addr->left_child));
                 if(rc != OK)
                 {
-                    err_ret(LOG_FILE_LINE,"en_queue failed, rc=%d.",rc);
                     break;
                 }
             }
