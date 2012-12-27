@@ -1,6 +1,5 @@
 #include <string.h>
 #include <assert.h>
-#include "g_type.h"
 #include "sys_lib.h"
 #include "err_num.h"
 #include "stack.h"
