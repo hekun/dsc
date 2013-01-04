@@ -25,9 +25,9 @@ typedef struct thr_binode_S
 
 struct TREE_T
 {
-    thr_binode_t * head;
-    thr_binode_t * tail;
-    Int32_t        len;
+    thr_binode_t * head;  //指向线索二叉树头结点。
+    thr_binode_t * tail;  //指向线索二叉树尾节点。
+    Int32_t        len;	  //节点个数。
     thr_binode_t * root;  //存储二叉树根节点。
 };
 
@@ -63,8 +63,16 @@ static Status InitTree_Threaded(TREE_T * tree, v_type_t type, void *data, size_t
         Free((void * *)tree);
         err_ret(LOG_FILE_LINE,"MakeRoot_Threaded failed. rc=%d.",rc);
     }
-    tree->head = tree->tail = tree->root;
-    tree->len = 0;
+	if(data == NULL)
+	{
+		tree->len = 0;
+		tree->head = tree->tail = NULL;
+	}
+	else
+	{
+		tree->head = tree->tail = tree->root;
+		tree->len++;
+	}
     return rc;
 }
 
@@ -110,14 +118,14 @@ static Status MakeRoot_Threaded(thr_binode_t **root, v_type_t type, void *data, 
 }
 
 
-static Status CreateTree_Threaded(TREE_T * tree ) 
+static Status CreateTree_Threaded(TREE_T * tree) 
 {
     Status rc = OK;
-
+	
 
     
     
-
+	return rc;
 }
 
 static void InOrderThreading(thr_binode_t *cur, thr_binode_t *prior)
