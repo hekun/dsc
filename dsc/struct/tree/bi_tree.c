@@ -218,9 +218,11 @@ static void DestroyTree_Binary(TREE_T *root)
 功能描述:
     利用队列实现二叉树的层次遍历
 参数说明:
-    
+    root--二叉树根节点。
+    visit--根节点操作函数。    
 返回值:
-    
+    OK--层序遍历成功。
+    !OK--层序遍历失败。
 作者:
     He kun
 日期:
@@ -288,7 +290,6 @@ static Status  LevelOrderTraverse_Binary(TREE_T root,tree_visit visit)
             }
         }
     }while(0);
-    printf("Output:\n");
     while(q_funcs.queue_empty(output) == FALSE)
     {
         q_funcs.de_queue(output, V_POINT, (void **)&node_addr, sizeof(node_addr));
