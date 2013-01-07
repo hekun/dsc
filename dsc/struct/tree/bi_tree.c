@@ -14,8 +14,8 @@ struct TREE_T
     TREE_T right_child;
 };
 
-static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
-static void   DestroyTree_Binary(TREE_T * root);
+static Status CreateBiTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
+static void   DestroyBiTree_Binary(TREE_T * root);
 static void   MidOrderRecusion_Binary(TREE_T root, tree_visit visit);
 static void   PostOrderRecusion_Binary(TREE_T root, tree_visit visit);
 static void   PreOrderRecursion_Binary(TREE_T root, tree_visit visit);
@@ -40,7 +40,7 @@ static void * GetTreeVal(TREE_T root);
 日期:
     2012-12-13
 */
-static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func)
+static Status CreateBiTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func)
 {
     v_data_t *vdata = NULL;
     Status rc = OK;
@@ -81,8 +81,8 @@ static Status CreateTree_Binary(TREE_T *root, queue_attr_t q_data, queue_funcs_t
         }
     }
 
-    CreateTree_Binary(&(*root)->left_child, q_data, q_func);
-    CreateTree_Binary(&(*root)->right_child, q_data, q_func);
+    CreateBiTree_Binary(&(*root)->left_child, q_data, q_func);
+    CreateBiTree_Binary(&(*root)->right_child, q_data, q_func);
     return OK;
 }
 
@@ -203,12 +203,12 @@ static void * GetTreeVal(TREE_T root)
 日期:
     2012-12-14
 */
-static void DestroyTree_Binary(TREE_T *root)
+static void DestroyBiTree_Binary(TREE_T *root)
 {
     if(*root)
     {
-        DestroyTree_Binary(&(*root)->left_child);
-        DestroyTree_Binary(&(*root)->right_child);
+        DestroyBiTree_Binary(&(*root)->left_child);
+        DestroyBiTree_Binary(&(*root)->right_child);
         destroy_vdata(&(*root)->data);
         Free((void * *) root);
     }
@@ -310,8 +310,8 @@ Status RegisterTreeFuncs_Binary(tree_funcs_t *funcs, tree_visit visit)
 {
     assert(funcs);
     Status rc = OK;
-    funcs->create_tree = CreateTree_Binary;
-    funcs->destroy_tree = DestroyTree_Binary;
+    funcs->create_bitree = CreateBiTree_Binary;
+    funcs->destroy_bitree = DestroyBiTree_Binary;
     if(visit == NULL)
     {
         funcs->opt_funcs.visit = NULL;

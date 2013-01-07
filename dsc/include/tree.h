@@ -17,8 +17,8 @@ typedef enum tree_type_E
 
 
 typedef Status (*tree_visit) (void * val);
-typedef Status (*CreateTree) (TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
-typedef void   (*DestroyTree) (TREE_T *root);
+typedef Status (*CreateBiTree) (TREE_T *root, queue_attr_t q_data, queue_funcs_t *q_func);
+typedef void   (*DestroyBiTree) (TREE_T *root);
 typedef void   (*PreOrderRecursion) (TREE_T root, tree_visit visit);
 typedef void   (*MidOrderRecusion)  (TREE_T root, tree_visit visit);
 typedef void   (*PostOrderRecusion) (TREE_T root, tree_visit visit);
@@ -32,8 +32,8 @@ typedef struct tree_opt_funcs_S
 
 typedef struct tree_funcs_S
 {
-    CreateTree  create_tree;
-    DestroyTree destroy_tree;
+    CreateBiTree  create_bitree;
+    DestroyBiTree destroy_bitree;
     PreOrderRecursion   preorder_recursion;
     MidOrderRecusion    midorder_recursion;
     PostOrderRecusion   postorder_recusion;

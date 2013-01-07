@@ -56,7 +56,7 @@ static Status tree_test(tree_type_t type)
     }
     do
     {
-        rc = tree_funcs.create_tree(&root, data, &queue_funcs);
+        rc = tree_funcs.create_bitree(&root, data, &queue_funcs);
         if(rc != OK)
         {
             err_ret(LOG_NO_FILE_LINE,"create binary tree failed. rc=%d.",rc);
@@ -73,7 +73,7 @@ static Status tree_test(tree_type_t type)
 
 
     }while(0);
-    tree_funcs.destroy_tree(&root);
+    tree_funcs.destroy_bitree(&root);
     queue_funcs.destroy_queue(&data);
     
     LogoutqueueFuncs(&queue_funcs, type);
