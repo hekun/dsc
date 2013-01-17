@@ -30,6 +30,10 @@ struct TREE_T
     Int32_t       len;  //节点总数。
 };
 
+static Status MakeBiNode_Thr(thr_binode_t ** node, v_type_t type, void *data, size_t size);
+
+
+
 /*
 功能描述:
     创建线索二叉树节点。
@@ -49,7 +53,7 @@ struct TREE_T
 日期:
     2013-01-05
 */
-static Status MakeBiThrNode(thr_binode_t ** node, v_type_t type, void *data, size_t size)
+static Status MakeBiNode_Thr(thr_binode_t ** node, v_type_t type, void *data, size_t size)
 {
     assert(!node);
     Status rc = OK;
@@ -84,7 +88,7 @@ static Status MakeBiThrNode(thr_binode_t ** node, v_type_t type, void *data, siz
 日期:
     2013-01-07
 */
-static Status initTree_BiThr(TREE_T *BiThrTree)
+static Status initBitree_Thr(TREE_T *BiThrTree)
 {
     assert(!BiThrTree);
     Status rc = OK;
@@ -101,13 +105,29 @@ static Status initTree_BiThr(TREE_T *BiThrTree)
 }
 
 
-static Status CreateBiTree_Thr(TREE_T BiThrTree, queue_attr_t q_data, queue_funcs_t *q_func)
+static Status CreateBiTree_Thr(TREE_T BiTreeThr, queue_attr_t q_data, queue_funcs_t *q_func)
 {
     Status rc = OK;
-
-
-
-
+    rc = CreateBiNode(&BiTreeThr->root, q_data, q_func);
+    if(rc != OK)
+    {
+        err_ret(LOG_FILE_LINE,"CreateBiNode failed. rc=%d.",rc);
+        DestroyBiNode(BiTreeThr->root);
+        return rc;
+    }
+    q_func->queue_length(q_data, &BiTreeThr->len);
+    thr_binode_t * prior = NULL;
+    while(prior->left_child)
+    {
+        prior = prior->left_child;
+    }
+    BiTreeThr->head = prior;
+    if(BiTreeThr->root)
+    {
+        prior = NULL;
+        InThreading(BiTreeThr->root, &prior);
+        BiTreeThr->tail = prior;
+    }
     return rc;
 }
 
@@ -129,18 +149,90 @@ static void InThreading(thr_binode_t *root, thr_binode_t **prior)
     if(root)
     {
         InThreading(root->left_child, prior);
-        if(!root->left_child)
+        if(root && !root->left_child)
         {
             root->LTag = Thread;
             root->left_child = *prior;
         }
-        if(!(*prior)->right_child)
+        if(*prior && !(*prior)->right_child)
         {
             (*prior)->RTag = Thread;
             (*prior)->right_child = root;
         }
         *prior = root;
         InThreading(root->right_child,prior);
+    }
+}
+
+/*
+功能描述:
+    递归方式先序方式创建二叉树。
+参数说明:
+    root--二叉树根节点二级指针。
+    q_data--存储输入的二叉树各节点的实际数据。
+返回值:
+    OK--创建节点成功。
+    !OK--创建节点失败。
+作者:
+    He kun
+日期:
+    2012-12-13
+*/
+static Status CreateBiNode(thr_binode_t **root, queue_attr_t q_data, queue_funcs_t *q_func)
+{
+    v_data_t *vdata = NULL;
+    Status rc = OK;
+    
+    if(!*root)
+    {
+        q_func->de_queue_vdata(q_data, &vdata);
+        if( get_vdata(vdata) == NULL)
+        {
+            *root = NULL;
+            destroy_vdata(&vdata);
+            return rc;
+        }
+        else
+        {
+            rc = MakeBiNode_Thr(root,vdata->type, vdata->val, vdata->val_size);
+            if(rc != OK)
+            {
+                err_ret(LOG_FILE_LINE,"MakeBiNode_Thr failed.rc=%d.",rc);
+            }
+        }
+        destroy_vdata(&vdata);
+        if(rc != OK)
+        {
+            log_msg(LOG_NO_FILE_LINE, "Create binary tree node failed!.");
+            return rc;
+        }
+    }
+
+    CreateBiNode(&(*root)->left_child, q_data, q_func);
+    CreateBiNode(&(*root)->right_child, q_data, q_func);
+    return OK;
+}
+
+/*
+功能描述:
+    基于后续遍历方式销毁二叉树。
+参数说明:
+    root--二叉树根节点地址。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2012-12-14
+*/
+static void DestroyBiNode(thr_binode_t *root)
+{
+    if(*root)
+    {
+        DestroyBiNode(&(*root)->left_child);
+        DestroyBiNode(&(*root)->right_child);
+        destroy_vdata(&(*root)->data);
+        Free((void * *) root);
     }
 }
 
