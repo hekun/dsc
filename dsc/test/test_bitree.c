@@ -2,32 +2,32 @@
 #include <string.h>
 #include "sys_lib.h"
 #include "err_num.h"
-#include "tree.h"
+#include "bitree.h"
 /*124##5##36##7##*/
 static Status visitnode_tree(void *val);
-static Status tree_test(tree_type_t type);
+static Status BiTreeTest(BiTree_Type_t type);
 
 #define BUFFER_SIZE     65535
 
 Int32_t main(void)
 {
     log_msg(LOG_NO_FILE_LINE,"--------BINARY TREE TEST--------");
-    tree_test(BINART_TREE);
+    BiTreeTest(THREADED_BINART_TREE);
     return OK;
 }
 
 
-static Status tree_test(tree_type_t type)
+static Status BiTreeTest(BiTree_Type_t type)
 {
     Status rc = OK;
     Int32_t i = 0;
     Char8_t buffer[BUFFER_SIZE];
-    tree_attr_t root = NULL;
+    tree_attr_t tree = NULL;
     queue_attr_t data = NULL;
-    tree_funcs_t tree_funcs;
+    bitree_funcs_t bitree_funcs;
     queue_funcs_t queue_funcs;
     memset(buffer,'\0',sizeof(buffer));
-    RegisterTreeFuncs(&tree_funcs, type, visitnode_tree);
+    RegisterBiTreeFuncs(&bitree_funcs, type, visitnode_tree);
     RegisterQueueFuncs(&queue_funcs, QUEUE_SIGNAL_LINK_LIST, NULL);
     queue_funcs.init_queue(&data, QUEUE_SIGNAL_LINK_LIST, NULL);
     printf("Input val string:\n");
@@ -56,28 +56,28 @@ static Status tree_test(tree_type_t type)
     }
     do
     {
-        rc = tree_funcs.create_bitree(&root, data, &queue_funcs);
+        rc = bitree_funcs.create_bitree(&tree, data, &queue_funcs);
         if(rc != OK)
         {
             err_ret(LOG_NO_FILE_LINE,"create binary tree failed. rc=%d.",rc);
             break;
         }
         log_msg(LOG_NO_FILE_LINE, "Binary tree Pre Order recursion:");
-        tree_funcs.preorder_recursion(root, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree mid Order recursion:");
-        tree_funcs.midorder_recursion(root, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree Post Order recursion:");
-        tree_funcs.postorder_recusion(root, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree level Order:");
-        tree_funcs.level_order(root, visitnode_tree);
+        bitree_funcs.traverse_bitree(tree, visitnode_tree, PRE_ORDER);
+        //log_msg(LOG_NO_FILE_LINE, "Binary tree mid Order recursion:");
+        //bitree_funcs.midorder_recursion(root, visitnode_tree);
+        //log_msg(LOG_NO_FILE_LINE, "Binary tree Post Order recursion:");
+        //bitree_funcs.postorder_recusion(root, visitnode_tree);
+        //log_msg(LOG_NO_FILE_LINE, "Binary tree level Order:");
+        //bitree_funcs.level_order(root, visitnode_tree);
 
 
     }while(0);
-    tree_funcs.destroy_bitree(&root);
+    bitree_funcs.destroy_bitree(&tree);
     queue_funcs.destroy_queue(&data);
     
     LogoutqueueFuncs(&queue_funcs, type);
-    LogoutTreeFuncs(&tree_funcs);
+    LogoutBiTreeFuncs(&bitree_funcs);
     return rc;
 }
 

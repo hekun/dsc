@@ -1,6 +1,6 @@
 include ../../Makefile.config
 CFLAGS=-g -shared -fPIC -Wall -I../include -I../../include
-target_objects=tree.o bi_tree.o
+target_objects=bitree.o bitree_threaded.o
 all: $(target_objects)
 .c.o:
 	$(CC) $(CFLAGS) -c -o $(OBJS)/$@ $< $(DEBUG)
