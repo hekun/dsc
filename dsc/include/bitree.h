@@ -29,6 +29,7 @@ typedef enum VISIT_ORDER_E
 
 
 typedef Status (*tree_visit)    (void * val);
+typedef Status (*InitBitree)    (BI_TREE_T *tree);
 typedef Status (*CreateBiTree)  (BI_TREE_T *tree, queue_attr_t q_data, queue_funcs_t *q_func);
 typedef void   (*DestroyBiTree) (BI_TREE_T *tree);
 typedef void   (*TraverseBiTree)(BI_TREE_T tree, tree_visit visit, visit_order_t order);
@@ -41,6 +42,7 @@ typedef struct tree_opt_funcs_S
 
 typedef struct tree_funcs_S
 {
+    InitBitree    init_bitree;
     CreateBiTree  create_bitree;
     DestroyBiTree destroy_bitree;
     TraverseBiTree traverse_bitree;

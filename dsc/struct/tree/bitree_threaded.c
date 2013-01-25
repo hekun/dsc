@@ -7,7 +7,7 @@
 #include "bitree_threaded.h"
 
 
-#define BI_TREE_T tree_attr_t
+#define BI_TREE_T bitree_attr_t
 typedef enum PointTag_E
 {
     Link,   //表示指针存储地址为子节点地址。
@@ -44,6 +44,7 @@ static void   PreOrderTraver(BI_TREE_T tree, tree_visit visit);
 
 /*对外支持的函数*/
 static Status InitBiTree_Threaded(BI_TREE_T * tree);
+static Status CreateBiTree_Thread(BI_TREE_T * tree, queue_attr_t q_data, queue_funcs_t * q_func);
 static void   DestroyBiTree_Threaded(BI_TREE_T *tree);
 static void   TraverseBitree_Threaded(BI_TREE_T tree, tree_visit visit, visit_order_t order);
 
@@ -107,15 +108,15 @@ static Status MakeNode_Threaded(thr_binode_t **root, v_type_t type, void *data, 
         err_ret(LOG_FILE_LINE,"Malloc failed.rc=%d.",rc);
         return rc;
     }
-    rc = init_vdata(&root->data,type, data, size);
+    rc = init_vdata(&(*root)->data,type, data, size);
     if(rc != OK)
     {
         Free((void * *)root);
         err_ret(LOG_FILE_LINE,"init_vdata failed. rc=%d.",rc);
         return rc;
     }
-    root->left_child = root->right_child = NULL;
-    root->LTag = root->RTag = Link;
+    (*root)->left_child = (*root)->right_child = NULL;
+    (*root)->LTag = (*root)->RTag = Link;
     return rc;
 }
 
@@ -128,9 +129,9 @@ static void InOrderThreading(thr_binode_t *cur, thr_binode_t **prior)
         if(!cur->left_child)
         {
             cur->LTag = Thread;
-            cur->left_child = prior;
+            cur->left_child = *prior;
         }
-        if(!(*prior)->right_child)
+        if(*prior && !(*prior)->right_child)
         {
             (*prior)->RTag = Thread;
             (*prior)->right_child = cur;
@@ -211,9 +212,9 @@ static Status CreateBiTree_Thread(BI_TREE_T * tree, queue_attr_t q_data, queue_f
 	}
 	//获取二叉树最左端叶子节点地址，作为线索链表的头结点
 	thr_binode_t *prior = (*tree)->root;
-	while((*prior)->left_child)
+	while(prior->left_child)
 	{
-		prior = (*prior)->left_child;
+		prior = prior->left_child;
 	}
 	(*tree)->head = prior;
 
@@ -231,7 +232,7 @@ static Status CreateBiTree_Thread(BI_TREE_T * tree, queue_attr_t q_data, queue_f
 
 /*
 功能描述:
-    基于后续遍历方式销毁二叉树。
+    销毁线索二叉树。
 参数说明:
     root--二叉树根节点地址。
 返回值:
@@ -243,13 +244,36 @@ static Status CreateBiTree_Thread(BI_TREE_T * tree, queue_attr_t q_data, queue_f
 */
 static void DestroyBiNode(thr_binode_t **root)
 {
-    if(*root)
+    thr_binode_t * cur = *root;
+    thr_binode_t * prior = *root;
+    //1.仅有一个节点。
+
+    //2.有多个节点。
+    while(cur)
     {
-        DestroyBiNode(&(*root)->left_child);
-        DestroyBiNode(&(*root)->right_child);
-        destroy_vdata(&(*root)->data);
-        Free((void * *) root);
-    }
+        while(cur->LTag == Link)
+        {
+            cur = cur->left_child;
+        }
+        prior = cur;
+        while(cur->RTag == Thread && cur->right_child)
+        {
+            cur = cur->right_child;
+            #ifdef _DEBUG
+            printf("Free node %c.\n", *(char *)prior->data->val);
+            #endif
+            destroy_vdata(&prior->data);
+            Free((void * *)&prior);
+            prior = cur;
+        }
+        cur = cur->right_child;
+        #ifdef _DEBUG
+        printf("Free node %c.\n", *(char *)prior->data->val);
+        #endif
+        destroy_vdata(&prior->data);
+        Free((void * *)&prior);
+        prior = cur;
+    }    
 }
 
 /*
@@ -266,11 +290,11 @@ static void DestroyBiNode(thr_binode_t **root)
 */
 static void DestroyBiTree_Threaded(BI_TREE_T *tree)
 {
-	if((*tree)->root)
+	if((*tree)->head)
 	{
-		DestroyBiNode(&(*tree)->root);
+		DestroyBiNode(&(*tree)->head);
 	}
-	Free(tree);
+	Free((void **)tree);
 }
 
 /*
@@ -290,11 +314,10 @@ static void DestroyBiTree_Threaded(BI_TREE_T *tree)
 static void TraverseBitree_Threaded(BI_TREE_T tree, tree_visit visit, visit_order_t order)
 {
 	assert(tree && visit && order != UNKNOWN_ORDER);
-	Status rc = OK;
 	switch(order)
 	{
 		case PRE_ORDER:
-			PreOrderTraver(tree->root, visit);
+			PreOrderTraver(tree, visit);
 			break;
 		case THREAD_ORDER:
 			LinkOrderTraverse(tree, visit);
@@ -321,7 +344,7 @@ static void TraverseBitree_Threaded(BI_TREE_T tree, tree_visit visit, visit_orde
 */
 static void PreOrderTraver(BI_TREE_T tree, tree_visit visit)
 {
-	thr_binode_t *node = tree->head;
+	thr_binode_t *node = tree->root;
 
 	while(node)
 	{
@@ -329,8 +352,8 @@ static void PreOrderTraver(BI_TREE_T tree, tree_visit visit)
 		//向左遍历左子树，直到遇到叶子节点。
 		while(node->LTag == Link)
 		{
-			visit(GetBiTreeVal(node));
 			node = node->left_child;
+            visit(GetBiTreeVal(node));
 		}
 		//从叶子节点开始向上遍历，直到遇到遍历的节点存在右子树。
 		while(node->RTag == Thread && node->right_child)
@@ -341,94 +364,12 @@ static void PreOrderTraver(BI_TREE_T tree, tree_visit visit)
 		node = node->right_child;
 	}
 }
-/*
-功能描述:
-    利用队列实现二叉树的层次遍历
-参数说明:
-    root--二叉树根节点。
-    visit--根节点操作函数。    
-返回值:
-    OK--层序遍历成功。
-    !OK--层序遍历失败。
-作者:
-    He kun
-日期:
-    2012-12-25
-*/
-static Status  LevelOrderTraverse(thr_binode_t *root,tree_visit visit)
+
+static void PostOrderTraver(BI_TREE_T tree, tree_visit visit)
 {
-    assert(root && visit);
-    Status rc = OK;
-    tree_attr_t node_addr = NULL;
-    queue_attr_t q = NULL;
-    queue_attr_t output = NULL;
-    queue_funcs_t q_funcs;
     
-    
-    RegisterQueueFuncs(&q_funcs, QUEUE_SIGNAL_LINK_LIST, NULL);
-    rc = q_funcs.init_queue(&q, QUEUE_SIGNAL_LINK_LIST,NULL);
-    if(rc != OK)
-    {
-        err_ret(LOG_FILE_LINE,"init_queue failed.rc=%d.",rc);
-        return rc;
-    }    
-    rc = q_funcs.init_queue(&output,QUEUE_SIGNAL_LINK_LIST,NULL);
-    if(rc != OK)
-    {
-        q_funcs.destroy_queue(&q);
-        err_ret(LOG_FILE_LINE,"destroy_queue failed. rc=%d.",rc);
-        return rc;
-    }
-
-    do
-    {
-        rc = q_funcs.en_queue(q, V_POINT, root, sizeof(root));
-        if(rc != OK)
-        {
-            err_ret(LOG_FILE_LINE,"en_queue failed. rc=%d.",rc);
-            break;
-        }
-        while(q_funcs.queue_empty(q) == FALSE)
-        {
-            q_funcs.de_queue(q, V_POINT, (void **)&node_addr, sizeof(node_addr));
-            rc = q_funcs.en_queue(output, V_POINT, node_addr, sizeof(node_addr));
-            if(rc != OK)
-            {
-                err_ret(LOG_FILE_LINE,"en_queue failed, rc=%d.",rc);
-                break;
-            }
-            if(node_addr->left_child)
-            {
-                rc = q_funcs.en_queue(q, V_POINT, node_addr->left_child, sizeof(node_addr->left_child));
-                if(rc != OK)
-                {
-                    break;
-                }
-            }
-            if(node_addr->right_child)
-            {
-                rc= q_funcs.en_queue(q,V_POINT, node_addr->right_child, sizeof(node_addr->right_child));
-                if(rc != OK)
-                {
-                    err_ret(LOG_FILE_LINE,"en_queue failed, rc=%d.",rc);
-                    break;
-                }
-
-            }
-        }
-    }while(0);
-    while(q_funcs.queue_empty(output) == FALSE)
-    {
-        q_funcs.de_queue(output, V_POINT, (void **)&node_addr, sizeof(node_addr));
-        visit(GetBiTreeVal(node_addr));
-    }
-    
-    q_funcs.clear_queue(q);
-    q_funcs.clear_queue(output);
-    q_funcs.destroy_queue(&q);
-    q_funcs.destroy_queue(&output);
-    return rc;
 }
+
 
 /*
 功能描述:
@@ -470,14 +411,23 @@ static void * GetBiTreeVal(thr_binode_t *root)
 */
 static void LinkOrderTraverse(BI_TREE_T tree, tree_visit visit)
 {
-	assert(tree && visit);
-	thr_binode_t *node = tree->head;
-	//对线索化的二叉树顺序遍历.
-	while(node)
-	{
-		visit(GetBiTreeVal(node));
-		node = node->right_child;
-	}
+    assert(tree && visit);
+    thr_binode_t * cur = tree->root;
+    while(cur)
+    {
+        while(cur->LTag == Link)
+        {
+            cur = cur->left_child;
+        }
+        visit(GetBiTreeVal(cur));
+        while(cur->RTag == Thread && cur->right_child)
+        {
+            cur = cur->right_child;
+            visit(GetBiTreeVal(cur));
+        }
+        cur = cur->right_child;
+    }
+
 }
 
 /*
@@ -496,13 +446,23 @@ static void LinkOrderTraverse(BI_TREE_T tree, tree_visit visit)
 static void LinkReverseTraverse(BI_TREE_T tree, tree_visit visit)
 {
     assert(tree && visit);
-	thr_binode_t *node = tree->tail;
-	//对线索化的二叉树逆序遍历
-	while(node)
-	{
-		visit(GetBiTreeVal(node));
-		node = node->left_child;
-	}
+    thr_binode_t *cur = tree->root;
+    while(cur)
+    {
+        while(cur->RTag == Link)
+        {
+            cur = cur->right_child;
+        }
+        visit(GetBiTreeVal(cur));
+        while(cur->LTag == Thread && cur->left_child)
+        {
+            cur = cur->left_child;
+            visit(GetBiTreeVal(cur));
+        }
+        cur = cur->left_child;
+    }
+
+    
 }
 
 /*
@@ -521,16 +481,17 @@ static void LinkReverseTraverse(BI_TREE_T tree, tree_visit visit)
 Status RegisterBiTreeFuncs_threaded(bitree_funcs_t *funcs, tree_visit visit)
 {
     assert(funcs);
+    funcs->init_bitree = InitBiTree_Threaded;
     funcs->create_bitree = CreateBiTree_Thread;
     funcs->destroy_bitree = DestroyBiTree_Threaded;
     if(visit)
     {
         funcs->opt_funcs.visit = visit;
-        funcs->traverse_bitree = TraverBitree_Threaded;
+        funcs->traverse_bitree = TraverseBitree_Threaded;
     }
     else
     {
-        funcs->opt_funcs = NULL;
+        funcs->opt_funcs.visit = NULL;
         funcs->traverse_bitree = NULL;
     }
     return OK;

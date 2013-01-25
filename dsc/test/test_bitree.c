@@ -22,7 +22,7 @@ static Status BiTreeTest(BiTree_Type_t type)
     Status rc = OK;
     Int32_t i = 0;
     Char8_t buffer[BUFFER_SIZE];
-    tree_attr_t tree = NULL;
+    bitree_attr_t tree = NULL;
     queue_attr_t data = NULL;
     bitree_funcs_t bitree_funcs;
     queue_funcs_t queue_funcs;
@@ -62,7 +62,11 @@ static Status BiTreeTest(BiTree_Type_t type)
             err_ret(LOG_NO_FILE_LINE,"create binary tree failed. rc=%d.",rc);
             break;
         }
-        log_msg(LOG_NO_FILE_LINE, "Binary tree Pre Order recursion:");
+        log_msg(LOG_NO_FILE_LINE, "Binary tree Link Order:");
+        bitree_funcs.traverse_bitree(tree, visitnode_tree, THREAD_ORDER);
+        log_msg(LOG_NO_FILE_LINE, "Binary tree Link Reverse:");
+        bitree_funcs.traverse_bitree(tree, visitnode_tree, THREAD_REVERSE);
+        log_msg(LOG_NO_FILE_LINE, "Binary tree pre Order :");
         bitree_funcs.traverse_bitree(tree, visitnode_tree, PRE_ORDER);
         //log_msg(LOG_NO_FILE_LINE, "Binary tree mid Order recursion:");
         //bitree_funcs.midorder_recursion(root, visitnode_tree);
