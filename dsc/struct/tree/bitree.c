@@ -11,7 +11,7 @@ Status RegisterBiTreeFuncs(bitree_funcs_t *funcs, BiTree_Type_t type, tree_visit
     Status rc = OK;
     switch(type)
     {
-        case THREADED_BINART_TREE:
+        case THREADED_BINARTY_TREE:
             RegisterBiTreeFuncs_threaded(funcs, visit);
             break;
         default:
