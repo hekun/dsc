@@ -480,7 +480,7 @@ static void InOrderTraverse_Rec(thr_binode_t *root, tree_visit visit)
 
 /*
 功能描述:
-    遍历中序线索化二叉树
+    中序遍历中序线索化二叉树
 参数说明:
     root--中序线索化二叉树根节点。
     visit--对每个节点执行的操作。
@@ -534,6 +534,19 @@ static void PreOrderTraverse_Rec(thr_binode_t *root, tree_visit visit)
     }
 }
 
+/*
+功能描述:
+    先序遍历先序线索化二叉树
+参数说明:
+    root--先序线索化二叉树根节点。
+    visit--对每个节点执行的操作。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2013-01-31
+*/
 static void PreOrderTraverse_Thr(thr_binode_t *root, tree_visit visit)
 {
     assert(root && visit);
@@ -577,7 +590,19 @@ static void PostOrderTraverse_Rec(thr_binode_t*root, tree_visit visit)
     }
 }
 
-
+/*
+功能描述:
+    后序遍历后序线索化二叉树
+参数说明:
+    root--二叉树根节点地址。
+    visit--遍历节点函数指针。
+返回值:
+    无
+作者:
+    He kun
+日期:
+    2013-02-06
+*/
 static void PostOrderTraverse_Thr(thr_binode_t *root, tree_visit visit)
 {
     assert(root && visit);
@@ -633,7 +658,20 @@ static void PostOrderTraverse_Thr(thr_binode_t *root, tree_visit visit)
 }
 
 
-
+/*
+功能描述:
+    二叉树遍历接口函数
+参数说明:
+    root--二叉树根节点地址。
+    visit--遍历节点函数指针。
+返回值:
+    ERR_PARAMATER--参数错误
+    OK--成功
+作者:
+    He kun
+日期:
+    2013-02-16
+*/
 static Status BiTreeTraverse_Thr(BI_TREE_T tree, tree_visit visit)
 {
     assert(tree && visit);

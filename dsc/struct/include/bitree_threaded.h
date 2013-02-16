@@ -1,5 +1,5 @@
-#ifndef BI_TREE_INCLUDE
-#define BI_TREE_INCLUDE
+#ifndef BI_TREE_THREADED_INCLUDE
+#define BI_TREE_THREADED_INCLUDE
 
 
 #include "bitree.h"

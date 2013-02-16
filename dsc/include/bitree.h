@@ -1,5 +1,5 @@
-#ifndef TREE_INCLUDE
-#define TREE_INCLUDE
+#ifndef BI_TREE_INCLUDE
+#define BI_TREE_INCLUDE
 
 #include "g_type.h"
 #include "v_data.h"
