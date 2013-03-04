@@ -3,7 +3,8 @@
 #include "err_num.h"
 #include "sys_lib.h"
 #include "bitree.h"
-#include "bitree_threaded.h"
+//#include "bitree_threaded.h"
+#include "bitree_unrec.h"
 
 Status RegisterBiTreeFuncs(bitree_funcs_t *funcs, BiTree_Type_t type, tree_visit visit)
 {
@@ -11,8 +12,11 @@ Status RegisterBiTreeFuncs(bitree_funcs_t *funcs, BiTree_Type_t type, tree_visit
     Status rc = OK;
     switch(type)
     {
-        case THREADED_BINARTY_TREE:
-            RegisterBiTreeFuncs_threaded(funcs, visit);
+        //case THREADED_BINARTY_TREE:
+        //    RegisterBiTreeFuncs_threaded(funcs, visit);
+        //    break;
+        case PARENT_BINARY_TREE:
+            RegisterBiTreeFuncs_Unrec(funcs, visit);
             break;
         default:
             rc = ERR_PARAMATER;

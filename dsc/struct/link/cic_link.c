@@ -387,6 +387,7 @@ static void DelFirstVal_Cic(LINK_T cic_attr,v_type_t type, void **val, size_t si
 返回值:
     OK--成功:
     !OK--失败。
+    ERR_EMPTY_LIST--链表为空。
 作者:
     He kun
 日期:
@@ -394,7 +395,11 @@ static void DelFirstVal_Cic(LINK_T cic_attr,v_type_t type, void **val, size_t si
 */
 static Status DelFirstVdata_Cic(LINK_T cic_attr, v_data_t **vdata)
 {
-    assert(!LinkEmpty_Cic(cic_attr) && !*vdata);
+    assert(!*vdata);
+    if(LinkEmpty_Cic(cic_attr))
+    {
+        return ERR_EMPTY_LIST;
+    }
     Status rc = OK;
     cic_node_t * node = cic_attr->head;
     rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);

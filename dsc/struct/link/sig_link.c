@@ -471,7 +471,11 @@ static void DelFirstVal_Sig(LINK_T sig_attr,v_type_t type, void **val, size_t si
 */
 static Status DelFirstVdata_Sig(LINK_T sig_attr, v_data_t **vdata)
 {
-    assert(!LinkEmpty_Sig(sig_attr) && !*vdata);
+    assert(!*vdata);
+    if(LinkEmpty_Sig(sig_attr))
+    {
+        return ERR_EMPTY_LIST;
+    }
     Status rc = OK;
     sig_node_t * node = sig_attr->head;
     rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);

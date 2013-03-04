@@ -7,6 +7,7 @@
 test cases:
 124##5##36##7##
 12#3##45###
+1#2#3##
 */
 static Status visitnode_tree(void *val);
 static Status BiTreeTest(BiTree_Type_t type);
@@ -16,7 +17,8 @@ static Status BiTreeTest(BiTree_Type_t type);
 Int32_t main(void)
 {
     log_msg(LOG_NO_FILE_LINE,"--------BINARY TREE TEST--------");
-    BiTreeTest(THREADED_BINARTY_TREE);
+    //BiTreeTest(THREADED_BINARTY_TREE);
+    BiTreeTest(PARENT_BINARY_TREE);
     return OK;
 }
 
@@ -66,24 +68,19 @@ static Status BiTreeTest(BiTree_Type_t type)
             err_ret(LOG_NO_FILE_LINE,"create binary tree failed. rc=%d.",rc);
             break;
         }
-        log_msg(LOG_NO_FILE_LINE, "Binary tree pre Order recursion visit:");
-        bitree_funcs.threading_bitree(tree, PRE_ORDER);
+        log_msg(LOG_NO_FILE_LINE, "Binary tree pre Order Unrecursion visit:");
+        bitree_funcs.set_visit_order(tree, PRE_ORDER);
         bitree_funcs.traverse_bitree(tree, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree In Order recursion visit:");
-        bitree_funcs.threading_bitree(tree, IN_ORDER);
+        
+        log_msg(LOG_NO_FILE_LINE, "Binary tree In Order Unrecursion visit:");
+        bitree_funcs.set_visit_order(tree, IN_ORDER);
         bitree_funcs.traverse_bitree(tree, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree Post Order recursion visit:");
-        bitree_funcs.threading_bitree(tree, POST_ORDER);
+        
+        log_msg(LOG_NO_FILE_LINE, "Binary tree Post Order Unrecursion visit:");
+        bitree_funcs.set_visit_order(tree, POST_ORDER);
         bitree_funcs.traverse_bitree(tree, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree In Order visit:");
-        bitree_funcs.threading_bitree(tree, IN_THREADED_ORDER);
-        bitree_funcs.traverse_bitree(tree, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree Pre Order visit:");
-        bitree_funcs.threading_bitree(tree, PRE_THREADED_ORDER);
-        bitree_funcs.traverse_bitree(tree, visitnode_tree);
-        log_msg(LOG_NO_FILE_LINE, "Binary tree Post Order visit:");
-        bitree_funcs.threading_bitree(tree, POST_THREADED_ORDER);
-        bitree_funcs.traverse_bitree(tree, visitnode_tree);
+
+        
     }while(0);
     bitree_funcs.destroy_bitree(&tree);
     queue_funcs.destroy_queue(&data);

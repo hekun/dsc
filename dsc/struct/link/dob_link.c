@@ -383,7 +383,11 @@ static void DelFirstVal_Dob(LINK_T dob_attr,v_type_t type, void **val, size_t si
 */
 static Status DelFirstVdata_Dob(LINK_T dob_attr, v_data_t **vdata)
 {
-    assert(!LinkEmpty_Dob(dob_attr) && !*vdata);
+    assert(!*vdata);
+    if(LinkEmpty_Dob(dob_attr))
+    {
+        return ERR_EMPTY_LIST;
+    }
     Status rc = OK;
     dob_node_t * node = dob_attr->head;
     rc = init_vdata(vdata, node->data->type, node->data->val, node->data->val_size);
